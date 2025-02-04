@@ -13,8 +13,12 @@ namespace OutwardEnchanmentsViewer.UI
 {
     public class ItemDisplaySection
     {
+        // My personal description and separator
         Transform _separator;
         Transform _description;
+
+        Transform _originalSeparator;
+        Transform _originalDescription;
 
         Text _descriptionText;
         Row _headerRow;
@@ -31,6 +35,9 @@ namespace OutwardEnchanmentsViewer.UI
         public Text DescriptionText { get => _descriptionText; set => _descriptionText = value; }
         public Row HeaderRow { get => _headerRow; set => _headerRow = value; }
 
+        public Transform OriginalSeparator { get => _originalSeparator; set => _originalSeparator = value; }
+        public Transform OriginalDescription { get => _originalDescription; set => _originalDescription = value; }
+
         public void ShowDescription()
         {
             Separator.gameObject.SetActive(true);
@@ -43,6 +50,20 @@ namespace OutwardEnchanmentsViewer.UI
             Separator.gameObject.SetActive(false);
             Description.gameObject.SetActive(false);
             HeaderRow.GameObject.SetActive(false);
+        }
+
+        public void ShowOriginalDescription()
+        {
+            OriginalSeparator.gameObject.SetActive(true);
+            OriginalDescription.gameObject.SetActive(true);
+        }
+
+        //for empty item descriptions
+        //looks more visually appealing
+        public void HideOriginalDescription()
+        {
+            OriginalSeparator.gameObject.SetActive(false);
+            OriginalDescription.gameObject.SetActive(false);
         }
 
         public void SetHeaderText(string leftText = null, string rightText = null)
@@ -84,8 +105,8 @@ namespace OutwardEnchanmentsViewer.UI
                 return;
             }
 
-            Transform OriginalSeparator = itemDescriptionUI.Find("Content/Separator");
-            Transform OriginalDescription = itemDescriptionUI.Find("Content/Description");
+            OriginalSeparator = itemDescriptionUI.Find("Content/Separator");
+            OriginalDescription = itemDescriptionUI.Find("Content/Description");
 
             if(!OriginalSeparator || !OriginalDescription)
             {

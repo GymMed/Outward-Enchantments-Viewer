@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using SideLoader;
 using UnityEngine;
-using OutwardEnchanmentsViewer.UI;
+using OutwardEnchanmentsViewer.Managers;
 
 namespace OutwardEnchanmentsViewer
 {
@@ -99,24 +99,7 @@ namespace OutwardEnchanmentsViewer
                     }
 
                     Item item = __instance.itemDisplay?.RefItem;
-
-                    if (!(item is Equipment))
-                    {
-                        ItemDisplayManager.Instance.HideDescription(characterUI);
-                        return;
-                    }
-
-                    List<EnchantmentRecipe> enchantmentRecipes = RecipeManager.Instance.GetEnchantmentRecipes();
-                    List<EnchantmentRecipe> availableEnchantments = new List<EnchantmentRecipe>();
-
-                    foreach (EnchantmentRecipe enchantmentRecipe in enchantmentRecipes)
-                    {
-                        if (enchantmentRecipe.GetHasMatchingEquipment(item))
-                        {
-                            SL.Log($"{OutwardEnchanmentsViewer.prefix} ItemDetailsDisplay@RefreshDetails equiment {item.Name} can be enchanted with {enchantmentRecipe.name}");
-                            availableEnchantments.Add(enchantmentRecipe);
-                        }
-                    }
+                    ItemDisplayManager.Instance.ShowOriginalDescription(characterUI);
 
                     CharacterInventory inventory = __instance.LocalCharacter?.Inventory;
 
@@ -126,40 +109,18 @@ namespace OutwardEnchanmentsViewer
                         return;
                     }
 
-                    List<Item> pouchItems = inventory.Pouch?.GetContainedItems();
-                    List<Item> bagItems = new List<Item>();
-
-                    if (inventory.HasABag)
+                    switch(item)
                     {
-                        bagItems = inventory.EquippedBag.Container.GetContainedItems();
+                        case Equipment equipment:
+                            ItemDescriptionsManager.Instance.SetEquipmentsEnchantmentsDescription(item, inventory, characterUI);
+                            break;
+                        case EnchantmentRecipeItem enchantmentRecipeItem:
+                            ItemDescriptionsManager.Instance.SetEnchantmentsDescription(enchantmentRecipeItem, inventory, characterUI);
+                            break;
+                        default:
+                            ItemDisplayManager.Instance.HideDescription(characterUI);
+                            return;
                     }
-                    //List<Item> equipedItems = inventory.Equipment.EquipmentSlots.GetContainedItems();
-
-                    List<Item> inventoryItems = pouchItems.Union(bagItems).ToList();
-                    List<EnchantmentRecipeItem> enchantments = OutwardEnchanmentsViewer.GetAllItemsOfType<EnchantmentRecipeItem>(inventoryItems);
-                    List<EnchantmentRecipe> haveEnchantments = new List<EnchantmentRecipe>();
-                    string haveRecipesNames = "";
-
-                    foreach (EnchantmentRecipeItem enchantmentRecipeItem in enchantments)
-                    {
-                        foreach (EnchantmentRecipe enchantmentRecipe in enchantmentRecipeItem.Recipes)
-                        {
-                            if (enchantmentRecipe.GetHasMatchingEquipment(item))
-                            {
-                                SL.Log($"{OutwardEnchanmentsViewer.prefix} equiment {item.Name} can be enchanted with {enchantmentRecipe.name} and {enchantmentRecipeItem.Name}, {enchantmentRecipeItem.name}");
-                                haveEnchantments.Add(enchantmentRecipe);
-                                haveRecipesNames += $"{enchantmentRecipeItem.Name} \n";
-                            }
-                        }
-                    }
-
-                    ItemDisplayManager.Instance.SetHeaderText(
-                        characterUI, 
-                        "Unlocked Enchantments",
-                        $"{haveEnchantments.Count}/{availableEnchantments.Count}"
-                    );
-                    ItemDisplayManager.Instance.SetDescriptionText(characterUI, haveRecipesNames);
-                    ItemDisplayManager.Instance.ShowDescription(characterUI);
                 }
                 catch(Exception e)
                 {

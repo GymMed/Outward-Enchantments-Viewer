@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using OutwardEnchanmentsViewer.UI;
 using SideLoader;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace OutwardEnchanmentsViewer.UI
+namespace OutwardEnchanmentsViewer.Managers
 {
     public class ItemDisplayManager
     {
@@ -36,9 +37,25 @@ namespace OutwardEnchanmentsViewer.UI
             DictionaryDisplaySections.Add(characterUI, new ItemDisplaySection(characterUI));
         }
 
-        public void ShowDescription(CharacterUI characterUI)
+        public void ShowDescription(CharacterUI characterUI, bool hideOrginalDescription = false)
         {
-            GetItemDisplaySection(characterUI).ShowDescription();
+            ItemDisplaySection itemDisplaySection = GetItemDisplaySection(characterUI);
+            itemDisplaySection.ShowDescription();
+
+            if(hideOrginalDescription) 
+            {
+                itemDisplaySection.HideOriginalDescription();
+            }
+        }
+
+        public void ShowOriginalDescription(CharacterUI characterUI)
+        {
+            GetItemDisplaySection(characterUI).ShowOriginalDescription();
+        }
+
+        public void HideOriginalDescription(CharacterUI characterUI)
+        {
+            GetItemDisplaySection(characterUI).HideOriginalDescription();
         }
 
         public void HideDescription(CharacterUI characterUI)
