@@ -11,7 +11,7 @@
         <OutputPath>..\Release\</OutputPath>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="BepInEx.BaseLib" Version="5.4.16" />
+        <PackageReference Include="BepInEx.BaseLib" Version="5.4.21" />
         <PackageReference Include="HarmonyX" Version="2.5.7" />
         <PackageReference Include="Outward.GameLibs" Version="2022.5.18-r.0" />
         <PackageReference Include="Outward.SideLoader" Version="3.7.14" />

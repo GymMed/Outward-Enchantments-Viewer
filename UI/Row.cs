@@ -1,4 +1,4 @@
-﻿using OutwardEnchanmentsViewer.Enums;
+﻿using OutwardEnchantmentsViewer.Utility.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace OutwardEnchanmentsViewer.UI
+namespace OutwardEnchantmentsViewer.UI
 {
     public class Row 
     {

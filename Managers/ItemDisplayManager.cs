@@ -1,5 +1,5 @@
 ﻿using Mono.Cecil;
-using OutwardEnchanmentsViewer.UI;
+using OutwardEnchantmentsViewer.UI;
 using SideLoader;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace OutwardEnchanmentsViewer.Managers
+namespace OutwardEnchantmentsViewer.Managers
 {
     public class ItemDisplayManager
     {
@@ -48,6 +48,16 @@ namespace OutwardEnchanmentsViewer.Managers
             }
         }
 
+        public void ShowDisabledDescription(CharacterUI characterUI)
+        {
+            GetItemDisplaySection(characterUI).ShowDisabledDescription();
+        }
+
+        public void HideDisabledDescription(CharacterUI characterUI)
+        {
+            GetItemDisplaySection(characterUI).HideDisabledDescription();
+        }
+
         public void ShowOriginalDescription(CharacterUI characterUI)
         {
             GetItemDisplaySection(characterUI).ShowOriginalDescription();
@@ -66,6 +76,11 @@ namespace OutwardEnchanmentsViewer.Managers
         public void SetDescriptionText(CharacterUI characterUI, string text)
         {
             GetItemDisplaySection(characterUI).SetDescriptiontext(text);
+        }
+
+        public void SetDisabledDescriptionText(CharacterUI characterUI, string text)
+        {
+            GetItemDisplaySection(characterUI).SetDisabledDescriptiontext(text);
         }
 
         public void SetHeaderText(CharacterUI characterUI, string leftText, string rightText)
