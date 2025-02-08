@@ -23,7 +23,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.0.1";
+        public const string VERSION = "0.0.2";
 
         public static string prefix = "[gymmed-Enchantments-Viewer]";
 
@@ -71,10 +71,26 @@ namespace OutwardEnchantmentsViewer
         {
             static bool Prefix(ItemDetailsDisplay __instance)
             {
+                #if DEBUG
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@OnScrollDownPressed called! {__instance.gameObject.FindInParents<CharacterUI>(false).gameObject.name}");
+                #endif
                 // Ensure we don't run when already moving
                 if (__instance.m_movingScrollview)
                 {
                     return false;
+                }
+
+                //split screen character has a bug where scroll view port size is not passed let's fix it
+                if(__instance.m_viewPortSize == 0)
+                {
+                    RectTransform viewPort = __instance.transform.Find("ItemDetails/Stats/Scroll View/Viewport").GetComponent<RectTransform>();
+
+                    if(viewPort == null)
+                    {
+                        SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@OnScrollDownPressed missing ViewPort for ItemDetailsDisplay");
+                        return true;
+                    }
+                    __instance.m_viewPortSize = viewPort.rect.height;
                 }
 
                 float scrollAmount = __instance.m_viewPortSize / __instance.m_contentScrollView.content.rect.height;
@@ -82,6 +98,13 @@ namespace OutwardEnchantmentsViewer
                 __instance.m_movingScrollview = true;
                 __instance.m_btnScrollDown.interactable = false;
                 __instance.m_btnScrollUp.interactable = false;
+
+                #if DEBUG
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@OnScrollDownPressed called end! scrollAmount: {scrollAmount}" + 
+                    $" viewportSize: {__instance.m_viewPortSize} scrollViewHeight: {__instance.m_contentScrollView.content.rect.height}" + 
+                    $" normalized: {__instance.m_contentScrollView.verticalNormalizedPosition}");
+                
+                #endif
 
                 return false; // Block the original method from executing (because we handled everything)
             }
@@ -92,9 +115,25 @@ namespace OutwardEnchantmentsViewer
         {
             static bool Prefix(ItemDetailsDisplay __instance)
             {
+                #if DEBUG
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} Patch_OnScrollUpPressed called! {__instance.gameObject.FindInParents<CharacterUI>(false).gameObject.name}");
+                #endif
                 if (__instance.m_movingScrollview)
                 {
                     return false;
+                }
+
+                //split screen character has a bug where scroll view port size is not passed let's fix it
+                if(__instance.m_viewPortSize == 0)
+                {
+                    RectTransform viewPort = __instance.transform.Find("ItemDetails/Stats/Scroll View/Viewport").GetComponent<RectTransform>();
+
+                    if(viewPort == null)
+                    {
+                        SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@OnScrollUpPressed missing ViewPort for ItemDetailsDisplay");
+                        return true;
+                    }
+                    __instance.m_viewPortSize = viewPort.rect.height;
                 }
 
                 float scrollAmount = __instance.m_viewPortSize / __instance.m_contentScrollView.content.rect.height;
@@ -102,6 +141,12 @@ namespace OutwardEnchantmentsViewer
                 __instance.m_movingScrollview = true;
                 __instance.m_btnScrollDown.interactable = false;
                 __instance.m_btnScrollUp.interactable = false;
+
+                #if DEBUG
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} Patch_OnScrollUpPressed called ends! scrollAmount: {scrollAmount}" + 
+                    $" viewportSize: {__instance.m_viewPortSize} scrollViewHeight: {__instance.m_contentScrollView.content.rect.height}" + 
+                    $" normalized: {__instance.m_contentScrollView.verticalNormalizedPosition}");
+                #endif
 
                 return false; // Block the original method since we handled everything
             }
@@ -121,7 +166,7 @@ namespace OutwardEnchantmentsViewer
                     SL.Log($"{OutwardEnchantmentsViewer.prefix} CharacterUI@SetTargetCharacter called!");
                     #endif
                     new ItemDescriptionScrollFixer(__instance);
-                    ItemDisplayManager.Instance.CreateSection(__instance);
+                    ItemDisplayManager.Instance.TryCreateSection(__instance);
                 }
                 catch(Exception e)
                 {

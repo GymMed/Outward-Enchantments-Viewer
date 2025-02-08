@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OutwardEnchantmentsViewer.Utility.Helpers
 {
@@ -61,6 +62,24 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             }
 
             return totalDerviedClasses;
+        }
+
+        public static void TryCleaningGameObjectWithNames(Transform parent, string[] elementNames)
+        {
+            foreach (string elementName in elementNames)
+            {
+                TryCleaningGameObjectWithName(parent, elementName);
+            }
+        }
+
+        public static void TryCleaningGameObjectWithName(Transform parent, string elementName)
+        {
+            Transform element = parent.Find(elementName);
+
+            if (!element)
+                return;
+
+            GameObject.DestroyImmediate(element.gameObject);
         }
     }
 }

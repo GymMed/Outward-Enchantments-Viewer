@@ -32,8 +32,13 @@ namespace OutwardEnchantmentsViewer.Managers
 
         public Dictionary<CharacterUI, ItemDisplaySection> DictionaryDisplaySections { get => _dictionaryDisplaySections; set => _dictionaryDisplaySections = value; }
 
-        public void CreateSection(CharacterUI characterUI)
+        public void TryCreateSection(CharacterUI characterUI)
         {
+            DictionaryDisplaySections.TryGetValue(characterUI, out ItemDisplaySection itemSectionUI);
+
+            if (itemSectionUI != null)
+                return;
+
             DictionaryDisplaySections.Add(characterUI, new ItemDisplaySection(characterUI));
         }
 
@@ -90,7 +95,7 @@ namespace OutwardEnchantmentsViewer.Managers
 
         public ItemDisplaySection GetItemDisplaySection(CharacterUI characterUI)
         {
-            ItemDisplaySection itemSectionUI = DictionaryDisplaySections[characterUI];
+            DictionaryDisplaySections.TryGetValue(characterUI, out ItemDisplaySection itemSectionUI);
 
             if (itemSectionUI == null)
                 throw new Exception("Tried to retrieve missing characterUI from dictionary!");

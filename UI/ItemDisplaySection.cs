@@ -1,5 +1,6 @@
 ﻿using Mono.Cecil;
 using OutwardEnchantmentsViewer.Utility.Enums;
+using OutwardEnchantmentsViewer.Utility.Helpers;
 using SideLoader;
 using System;
 using System.Collections.Generic;
@@ -128,22 +129,22 @@ namespace OutwardEnchantmentsViewer.UI
         {
             Transform itemDescriptionUI = characterUI.transform.Find("Canvas/GameplayPanels/Menus/CharacterMenus/MainPanel/Content/MiddlePanel/Inventory/DetailPanel/ItemDetailsPanel/ItemDetails/Stats/Scroll View/Viewport");
 
-            if(!itemDescriptionUI)
+            if (!itemDescriptionUI)
             {
-                #if DEBUG
+#if DEBUG
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDisplaySection@CreateSection couldn't find Item Description UI!");
-                #endif
+#endif
                 return;
             }
 
             OriginalSeparator = itemDescriptionUI.Find("Content/Separator");
             OriginalDescription = itemDescriptionUI.Find("Content/Description");
 
-            if(!OriginalSeparator || !OriginalDescription)
+            if (!OriginalSeparator || !OriginalDescription)
             {
-                #if DEBUG
+#if DEBUG
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDisplaySection@CreateSection couldn't find Separator or Description in Item Description UI!");
-                #endif
+#endif
                 return;
             }
 
@@ -188,6 +189,5 @@ namespace OutwardEnchantmentsViewer.UI
             SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDisplaySection@CreateSection made description and separator!");
             #endif
         }
-
     }
 }
