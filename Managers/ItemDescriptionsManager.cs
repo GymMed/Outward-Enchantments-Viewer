@@ -42,17 +42,29 @@ namespace OutwardEnchantmentsViewer.Managers
 
             string haveRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(haveEnchantmentsDatas);
 
-            string headerText = "Unlocked Enchantments";
-            string unlockedEnchantments = $"{haveEnchantments.Count}/{availableEnchantments.Count}";
+            string headerRightText = "Unlocked Enchantments";
+
+            string headerLeftText = haveEnchantments.Count.ToString();
+
+            if(OutwardEnchantmentsViewer.ShowAllAvailableEnchantmentsCountForEquipment.Value)
+            {
+                headerLeftText = $"{headerLeftText}/{availableEnchantments.Count}";
+            }
 
             ItemDisplayManager.Instance.SetHeaderText(
                 characterUI, 
-                headerText,
-                unlockedEnchantments
+                headerRightText,
+                headerLeftText
             );
 
             ItemDisplayManager.Instance.SetDescriptionText(characterUI, haveRecipesDescriptions);
             ItemDisplayManager.Instance.ShowDescription(characterUI, String.IsNullOrEmpty(item.Description));
+
+            if(!OutwardEnchantmentsViewer.ShowMissingEnchantmentsForEquipment.Value)
+            {
+                ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                return;
+            }
 
             List<EnchantmentRecipe> missingEnchantments = EnchantmentsHelper.GetMissingEnchantments(availableEnchantments, haveEnchantments);
             string missingRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(missingEnchantments);
@@ -89,18 +101,7 @@ namespace OutwardEnchantmentsViewer.Managers
 #if DEBUG
                     SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@SetEnchantmentsDescription got enchantment {enchantment?.Name} RecipeID {recipe.RecipeID} ResultID {recipe.ResultID}");
 #endif
-                    string type = EnchantmentsHelper.GetEnchantmentArmorIngrediantType(recipe);
-
-                    if (!String.IsNullOrEmpty(type))
-                    {
-#if DEBUG
-                        output += $"{type} {recipe.name} {recipe.RecipeID}\n";
-#else
-                        output += $"{type}\n";
-#endif
-                    }
-                    output += GetEnchantmentInformation(enchantment);
-                    output += CustomEnchantmentsDescriptionsExtensions.GetDescription(recipe.RecipeID);
+                    output += GetEnchantmentInformation(enchantment, recipe);
                 }
 
                 ItemDisplayManager.Instance.SetHeaderText(
@@ -118,54 +119,58 @@ namespace OutwardEnchantmentsViewer.Managers
             }
         }
 
-        public string GetEnchantmentInformation(Enchantment enchantment)
+        public string GetEnchantmentRecipeEquipmentName(EnchantmentRecipe recipe)
+        {
+            string output = "";
+            string type = EnchantmentsHelper.GetEnchantmentArmorIngrediantType(recipe);
+
+            if (!String.IsNullOrEmpty(type))
+            {
+#if DEBUG
+                output += $"{type} {recipe.name} {recipe.RecipeID}\n";
+#else
+                output += $"{type}\n";
+#endif
+            }
+
+            return output;
+        }
+
+        public string GetDynamicEnchantmentInformationSection(Enchantment enchantment, EnchantmentRecipe recipe)
+        {
+            string output = "";
+
+            output += GetEnchantmentRecipeEquipmentName(recipe);
+            output += GetDynamicEnchantmentInformation(enchantment);
+
+            return output;
+
+        }
+
+        public string GetEnchantmentInformation(Enchantment enchantment, EnchantmentRecipe recipe)
         {
             try
             {
+                EnchantmentDescription enchantmentDescription = CustomEnchantmentsManager.Instance.TryGetDescription(recipe.RecipeID);
+
+                if (enchantmentDescription == null)
+                {
+                    #if DEBUG
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@GetEnchantmentInformation recipe id: {recipe.RecipeID} couldn't retrieve description!");
+                    #endif
+                    return GetDynamicEnchantmentInformationSection(enchantment, recipe);
+                }
+                #if DEBUG
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@GetEnchantmentInformation recipe id: {recipe.RecipeID} retrieved description: {enchantmentDescription.description}!");
+                #endif
+
+                if (enchantmentDescription.overwrite)
+                    return enchantmentDescription.description;
+
                 string output = "";
 
-                output += EnchantmentInformationHelper.GetDamageListDescription(enchantment);
-                output += EnchantmentInformationHelper.GetModifiersListDescriptions(enchantment);
-                output += EnchantmentInformationHelper.GetAdditionalDamagesDescription(enchantment);
-                output += EnchantmentInformationHelper.GetEffectsDescription(enchantment);
-                output += EnchantmentInformationHelper.GetStatModificationsDescription(enchantment);
-                output += EnchantmentInformationHelper.GetElementalResistancesDescription(enchantment);
-
-                if (enchantment.GlobalStatusResistance > 0.0f)
-                {
-                    output += $"Global Status Resistance {enchantment.GlobalStatusResistance.ToString()} \n\n";
-                }
-
-                if (enchantment.HealthAbsorbRatio > 0.0f)
-                {
-                    //output += $"Health Absorb Ratio {enchantment.HealthAbsorbRatio.ToString()} \n";
-                    output += $"Gain +{enchantment.HealthAbsorbRatio.ToString()}x Health Leech (damage " +
-                        $"dealth will restore {enchantment.HealthAbsorbRatio.ToString()}x the damage as Health) \n\n";
-                }
-
-                if (enchantment.Indestructible)
-                {
-                    output += $"Provides indestructibility \n";
-                }
-
-                if (enchantment.ManaAbsorbRatio > 0.0f)
-                {
-                    //output += $"Mana Absorb Ratio {enchantment.ManaAbsorbRatio.ToString()} \n";
-                    output += $"Gain +{enchantment.ManaAbsorbRatio.ToString()}x Mana Leech (damage " +
-                        $"dealth will restore {enchantment.ManaAbsorbRatio.ToString()}x the damage as Mana) \n\n";
-                }
-
-                if (enchantment.StaminaAbsorbRatio > 0.0f)
-                {
-                    //output += $"Stamina Absorb Ratio {enchantment.StaminaAbsorbRatio.ToString()} \n";
-                    output += $"Gain +{enchantment.StaminaAbsorbRatio.ToString()}x Stamina Leech (damage " +
-                        $"dealth will restore {enchantment.StaminaAbsorbRatio.ToString()}x the damage as Stamina) \n\n";
-                }
-
-                if (enchantment.TrackDamageRatio > 0.0f)
-                {
-                    output += $"Track Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n\n";
-                }
+                output += GetDynamicEnchantmentInformationSection(enchantment, recipe);
+                output += enchantmentDescription.description;
 
                 return output;
             }
@@ -174,6 +179,58 @@ namespace OutwardEnchantmentsViewer.Managers
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@GetEnchantmentInformation error: {ex.Message}");
                 return "Error";
             }
+        }
+
+        public string GetDynamicEnchantmentInformation(Enchantment enchantment)
+        {
+            string output = "";
+
+            output += EnchantmentInformationHelper.GetDamageListDescription(enchantment);
+            output += EnchantmentInformationHelper.GetModifiersListDescriptions(enchantment);
+            output += EnchantmentInformationHelper.GetAdditionalDamagesDescription(enchantment);
+            output += EnchantmentInformationHelper.GetEffectsDescription(enchantment);
+            output += EnchantmentInformationHelper.GetStatModificationsDescription(enchantment);
+            output += EnchantmentInformationHelper.GetElementalResistancesDescription(enchantment);
+
+            if (enchantment.GlobalStatusResistance > 0.0f)
+            {
+                output += $"Global Status Resistance {enchantment.GlobalStatusResistance.ToString()} \n\n";
+            }
+
+            if (enchantment.HealthAbsorbRatio > 0.0f)
+            {
+                //output += $"Health Absorb Ratio {enchantment.HealthAbsorbRatio.ToString()} \n";
+                output += $"Gain +{enchantment.HealthAbsorbRatio.ToString()}x Health Leech (damage " +
+                    $"dealth will restore {enchantment.HealthAbsorbRatio.ToString()}x the damage as Health) \n\n";
+            }
+
+            if (enchantment.Indestructible)
+            {
+                output += $"Provides indestructibility \n";
+            }
+
+            if (enchantment.ManaAbsorbRatio > 0.0f)
+            {
+                //output += $"Mana Absorb Ratio {enchantment.ManaAbsorbRatio.ToString()} \n";
+                output += $"Gain +{enchantment.ManaAbsorbRatio.ToString()}x Mana Leech (damage " +
+                    $"dealth will restore {enchantment.ManaAbsorbRatio.ToString()}x the damage as Mana) \n\n";
+            }
+
+            if (enchantment.StaminaAbsorbRatio > 0.0f)
+            {
+                //output += $"Stamina Absorb Ratio {enchantment.StaminaAbsorbRatio.ToString()} \n";
+                output += $"Gain +{enchantment.StaminaAbsorbRatio.ToString()}x Stamina Leech (damage " +
+                    $"dealth will restore {enchantment.StaminaAbsorbRatio.ToString()}x the damage as Stamina) \n\n";
+            }
+
+            if (enchantment.TrackDamageRatio > 0.0f)
+            {
+                output += $"Track Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n\n";
+            }
+
+            output += CustomEnchantmentsDescriptionsExtensions.GetDescription(enchantment.PresetID);
+
+            return output;
         }
     }
 }

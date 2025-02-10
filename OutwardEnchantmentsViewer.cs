@@ -13,6 +13,9 @@ using OutwardEnchantmentsViewer.Utility.Fixers;
 using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.IO;
+using OutwardEnchantmentsViewer.Utility.Helpers;
+using OutwardEnchantmentsViewer.Enchantments;
 
 namespace OutwardEnchantmentsViewer
 {
@@ -23,7 +26,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.0.2";
+        public const string VERSION = "0.1.0";
 
         public static string prefix = "[gymmed-Enchantments-Viewer]";
 
@@ -39,21 +42,28 @@ namespace OutwardEnchantmentsViewer
         }
 
         // If you need settings, define them like so:
-        public static ConfigEntry<bool> ExampleConfig;
+        public static ConfigEntry<bool> ShowEnchantmentDescriptions;
+        public static ConfigEntry<bool> ShowEquipmentDescriptions;
+        public static ConfigEntry<bool> ShowAllAvailableEnchantmentsCountForEquipment;
+        public static ConfigEntry<bool> ShowMissingEnchantmentsForEquipment;
 
         // Awake is called when your plugin is created. Use this to set up your mod.
         internal void Awake()
         {
             Log = this.Logger;
             Log.LogMessage($"Hello world from {NAME} {VERSION}!");
-            Log.LogMessage($"{OutwardEnchantmentsViewer.prefix} Logger!");
 
             #if DEBUG
+            Log.LogMessage($"{OutwardEnchantmentsViewer.prefix} Logger!");
             SL.Log($"{OutwardEnchantmentsViewer.prefix} Party hard!");
             #endif
 
             // Any config settings you define should be set up like this:
-            ExampleConfig = Config.Bind("ExampleCategory", "ExampleSetting", false, "This is an example setting.");
+            ShowEnchantmentDescriptions = Config.Bind("Enchantments Descriptions", "ShowEnchantmentDescriptions", true, "Show detailed descriptions for enchantments?");
+            ShowEquipmentDescriptions = Config.Bind("Equipment Descriptions", "ShowEquipmentEnchantmentsDescriptions", true, "Show enchantments for equipment?");
+            
+            ShowAllAvailableEnchantmentsCountForEquipment = Config.Bind("Equipment Descriptions Header", "ShowAllAvailableEnchantmentsCountForEquipment", true, "Show all available enchantments count for equipment?");
+            ShowMissingEnchantmentsForEquipment = Config.Bind("Equipment Descriptions Body", "ShowMissingEnchantmentsForEquipment", true, "Show missing enchantments for equipment?");
 
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
             new Harmony(GUID).PatchAll();
@@ -152,6 +162,28 @@ namespace OutwardEnchantmentsViewer
             }
         }
 
+        [HarmonyPatch(typeof(ResourcesPrefabManager), nameof(ResourcesPrefabManager.Load))]
+        public class ResourcesPrefabManager_Load
+        {
+            static void Postfix(ResourcesPrefabManager __instance)
+            {
+                #if DEBUG
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} ResourcesPrefabManager@Load called!");
+                #endif
+
+                string path = Path.Combine(
+                        XmlSerializerHelper.GetProjectLocation(),
+                        "customEnchantmentsDescriptions.xml"
+                    );
+
+                CustomEnchantmentsManager.Instance.LoadEnchantmentDictionaryFromXml(
+                    path
+                );
+
+                EnchantmentsHelper.FixFilterRecipe();
+            }
+        }
+
         [HarmonyPatch(typeof(CharacterUI))]
         [HarmonyPatch("SetTargetCharacter", MethodType.Normal)]
         public class CharacterUI_SetTargetCharacterPatch
@@ -214,7 +246,7 @@ namespace OutwardEnchantmentsViewer
                     {
                         case Equipment equipment:
                             {
-                                if (item.IsNonEnchantable)
+                                if (!ShowEquipmentDescriptions.Value || item.IsNonEnchantable)
                                 {
                                     ItemDisplayManager.Instance.HideDescription(characterUI);
                                     ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
@@ -225,6 +257,12 @@ namespace OutwardEnchantmentsViewer
                             }
                         case EnchantmentRecipeItem enchantmentRecipeItem:
                             {
+                                if (!ShowEnchantmentDescriptions.Value)
+                                {
+                                    ItemDisplayManager.Instance.HideDescription(characterUI);
+                                    ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                                    return;
+                                }
                                 ItemDescriptionsManager.Instance.SetEnchantmentsDescription(enchantmentRecipeItem, inventory, characterUI);
                                 ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
                                 break;

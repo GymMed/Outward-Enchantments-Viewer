@@ -17,7 +17,7 @@ namespace OutwardEnchantmentsViewer.Utility.Enums
 
     public static class CustomEnchantmentsDescriptionsExtensions
     {
-        //id
+        //The difference between these descriptions and CustomEnchantmentsManager is that these are not retrieved from json
         public static readonly Dictionary<CustomEnchantmentsDescriptions, string> CustomEnchantmentRecipesDescriptions = new Dictionary<CustomEnchantmentsDescriptions, string>()
         {
             { CustomEnchantmentsDescriptions.AngelLight, "Changes the color of the lantern to white and effects of Flamethrower to Electric. \n\n" + 
@@ -26,7 +26,7 @@ namespace OutwardEnchantmentsViewer.Utility.Enums
                 "Lantern can no longer be refueled, however it passively gains fuel when equipped but not lit." },
             { CustomEnchantmentsDescriptions.CopperFlame, "Changes the color of the lantern to green and effects of Flamethrower to Rust. \n\n" +
                 "Lantern can no longer be refueled, however it passively gains fuel when equipped but not lit." },
-            { CustomEnchantmentsDescriptions.SanguineFlame, "Changes the color of the lantern to Red and effects of Flamethrower to Decay Decay. \n\n" +
+            { CustomEnchantmentsDescriptions.SanguineFlame, "Changes the color of the lantern to Red and effects of Flamethrower to Decay. \n\n" +
                 "Lantern can no longer be refueled, however it passively gains fuel when equipped but not lit." }
         };
 

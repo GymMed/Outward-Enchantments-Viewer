@@ -152,5 +152,41 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             return missingEnchantments;
         }
+
+        // Fixes Game Developers Bug 
+        public static void FixFilterRecipe()
+        {
+            Item filter = ResourcesPrefabManager.Instance.GetItemPrefab("5800047");
+
+            if (filter == null)
+                return;
+
+            #if DEBUG
+            SL.Log($"{OutwardEnchantmentsViewer.prefix} EnchantmentsHelper@FixFilterRecipe got item Filter!");
+            #endif
+
+            EnchantmentRecipeItem filterRecipeItem = filter as EnchantmentRecipeItem;
+            if(!filterRecipeItem)
+            {
+                return;
+            }
+
+            EnchantmentRecipe[] filterRecipes = filterRecipeItem.Recipes;
+            EnchantmentRecipe filterArmor = RecipeManager.Instance.GetEnchantmentRecipeForID(52);
+            EnchantmentRecipe filterHelmet = RecipeManager.Instance.GetEnchantmentRecipeForID(53);
+            EnchantmentRecipe filterBoots = RecipeManager.Instance.GetEnchantmentRecipeForID(54);
+
+            if(filterArmor == null || filterHelmet == null || filterBoots == null)
+            {
+                return;
+            }
+
+            EnchantmentRecipe[] filterSet = new EnchantmentRecipe[] { filterArmor, filterHelmet, filterBoots };
+            filterRecipeItem.Recipes = filterSet;
+
+            #if DEBUG
+            SL.Log($"{OutwardEnchantmentsViewer.prefix} EnchantmentsHelper@FixFilterRecipe fixed item Filter!");
+            #endif
+        }
     }
 }

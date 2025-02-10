@@ -19,7 +19,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 {
                     filteredItems.Add(specificItem);
                     #if DEBUG
-                    SL.Log($"{OutwardEnchantmentsViewer.prefix} got item of type {specificItem.GetType().Name} name {specificItem.Name}");
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} got item of type {specificItem.GetType().Name} name {specificItem.Name} id {specificItem.ItemID}");
                     #endif
                 }
             }

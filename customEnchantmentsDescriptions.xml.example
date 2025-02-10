@@ -1,0 +1,18 @@
+<root>
+  <enchantments>
+    <enchantment>
+      <id>20</id>
+      <data>
+        <overwrite>true</overwrite>
+        <description>This is an enchantment for Recipe ID 20.</description>
+      </data>
+    </enchantment>
+    <enchantment>
+      <id>21</id>
+      <data>
+        <overwrite>false</overwrite>
+        <description>This is an enchantment for Recipe ID 21.</description>
+      </data>
+    </enchantment>
+  </enchantments>
+</root>
