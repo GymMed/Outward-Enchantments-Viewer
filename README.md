@@ -3,6 +3,11 @@
 </h1>
 <br/>
 <div align="center">
+  <img src="./preview/images/1.png" alt="Outward added item enchantments description."/>
+  <img src="./preview/images/3.png" alt="Outward added enchantment properties description."/>
+</div>
+
+<div align="center">
 	<a href="https://thunderstore.io/c/outward/p/GymMed/Enchantments_Viewer/">
 		<img src="https://img.shields.io/thunderstore/dt/GymMed/Enchantments_Viewer" alt="Thunderstore Downloads">
 	</a>
@@ -10,12 +15,6 @@
 		<img src="https://img.shields.io/thunderstore/v/GymMed/Enchantments_Viewer" alt="Thunderstore Version">
 	</a>
 </div>
-
-<div align="center">
-  <img src="./preview/images/1.png" alt="Outward added item enchantments description."/>
-  <img src="./preview/images/3.png" alt="Outward added enchantment properties description."/>
-</div>
-
 
 Outward mod that provides additional descriptions for items and enchantments.
 
