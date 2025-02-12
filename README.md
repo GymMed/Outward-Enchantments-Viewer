@@ -3,8 +3,12 @@
 </h1>
 <br/>
 <div align="center">
-	[![Downloads on Thunderstore](https://img.shields.io/thunderstore/dt/GymMed/Enchantments_Viewer)](https://thunderstore.io/c/outward/p/GymMed/Enchantments_Viewer/)
-	[![Thunderstore Version](https://img.shields.io/thunderstore/v/GymMed/Enchantments_Viewer)](https://github.com/GymMed/Outward-Enchantments-Viewer/releases)
+	<a href="https://thunderstore.io/c/outward/p/GymMed/Enchantments_Viewer/">
+		<img src="https://img.shields.io/thunderstore/dt/GymMed/Enchantments_Viewer" alt="Thunderstore Downloads">
+	</a>
+	<a href="https://github.com/GymMed/Outward-Enchantments-Viewer/releases/latest">
+		<img src="https://img.shields.io/thunderstore/v/GymMed/Enchantments_Viewer" alt="Thunderstore Version">
+	</a>
 </div>
 
 <div align="center">
