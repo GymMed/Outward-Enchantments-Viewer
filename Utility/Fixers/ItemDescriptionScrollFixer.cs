@@ -12,7 +12,7 @@ namespace OutwardEnchantmentsViewer.Utility.Fixers
 {
     public class ItemDescriptionScrollFixer
     {
-        CharacterUI _characterUI;
+        ItemDetailsDisplay _itemDetailsDisplay;
 
         Button _btnScrollUpButton;
         Button _btnScrollDownButton;
@@ -23,17 +23,17 @@ namespace OutwardEnchantmentsViewer.Utility.Fixers
         public Button BtnScrollDownButton { get => _btnScrollDownButton; set => _btnScrollDownButton = value; }
         public ScrollRect ScrollView { get => _scrollView; set => _scrollView = value; }
         public RectTransform Viewport { get => _viewport; set => _viewport = value; }
-        public CharacterUI CharacterUI { get => _characterUI; set => _characterUI = value; }
+        public ItemDetailsDisplay ItemDetailsDisplay { get => _itemDetailsDisplay; set => _itemDetailsDisplay = value; }
 
-        public ItemDescriptionScrollFixer(CharacterUI characterUI) 
+        public ItemDescriptionScrollFixer(ItemDetailsDisplay itemDetailsDisplay) 
         {
-            CharacterUI = characterUI;
-            CreateFixer(characterUI);
+            ItemDetailsDisplay = itemDetailsDisplay;
+            CreateFixer(itemDetailsDisplay);
         }
 
-        public void CreateFixer(CharacterUI characterUI)
+        public void CreateFixer(ItemDetailsDisplay itemDetailsDisplay)
         {
-            Transform itemDetailsUI = characterUI.transform.Find("Canvas/GameplayPanels/Menus/CharacterMenus/MainPanel/Content/MiddlePanel/Inventory/DetailPanel/ItemDetailsPanel/ItemDetails/");
+            Transform itemDetailsUI = itemDetailsDisplay.transform.Find("ItemDetails/");
                 #if DEBUG
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionScrollFixer@CreateFixer called!");
                 #endif

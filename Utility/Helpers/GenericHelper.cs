@@ -81,5 +81,21 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             GameObject.DestroyImmediate(element.gameObject);
         }
+
+        public bool HasParentWithHiddenItemDetails(Transform targetTransform, string []names)
+        {
+            Transform current = targetTransform;
+
+            while (current != null) // Traverse up the hierarchy
+            {
+                if (System.Array.Exists(names, name => current.name == name))
+                {
+                    return true;
+                }
+                current = current.parent; // Move up to the next parent
+            }
+
+            return false;
+        }
     }
 }

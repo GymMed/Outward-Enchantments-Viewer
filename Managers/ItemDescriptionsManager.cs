@@ -32,7 +32,7 @@ namespace OutwardEnchantmentsViewer.Managers
             }
         }
 
-        public void SetEquipmentsEnchantmentsDescription(Item item, CharacterInventory inventory, CharacterUI characterUI)
+        public void SetEquipmentsEnchantmentsDescription(Item item, CharacterInventory inventory, ItemDetailsDisplay itemDetailsDisplay)
         {
             List<EnchantmentRecipe> availableEnchantments = EnchantmentsHelper.GetAvailableEnchantmentRecipies(item);
             List<EnchantmentRecipeData> haveEnchantmentsDatas = EnchantmentsHelper.GetAvailableEnchantmentRecipeDatasInInventory(item, inventory);
@@ -52,17 +52,17 @@ namespace OutwardEnchantmentsViewer.Managers
             }
 
             ItemDisplayManager.Instance.SetHeaderText(
-                characterUI, 
+                itemDetailsDisplay, 
                 headerRightText,
                 headerLeftText
             );
 
-            ItemDisplayManager.Instance.SetDescriptionText(characterUI, haveRecipesDescriptions);
-            ItemDisplayManager.Instance.ShowDescription(characterUI, String.IsNullOrEmpty(item.Description));
+            ItemDisplayManager.Instance.SetDescriptionText(itemDetailsDisplay, haveRecipesDescriptions);
+            ItemDisplayManager.Instance.ShowDescription(itemDetailsDisplay, String.IsNullOrEmpty(item.Description));
 
             if(!OutwardEnchantmentsViewer.ShowMissingEnchantmentsForEquipment.Value)
             {
-                ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                ItemDisplayManager.Instance.HideDisabledDescription(itemDetailsDisplay);
                 return;
             }
 
@@ -71,16 +71,16 @@ namespace OutwardEnchantmentsViewer.Managers
 
             if(missingEnchantments.Count > 0)
             {
-                ItemDisplayManager.Instance.SetDisabledDescriptionText(characterUI, missingRecipesDescriptions);
-                ItemDisplayManager.Instance.ShowDisabledDescription(characterUI);
+                ItemDisplayManager.Instance.SetDisabledDescriptionText(itemDetailsDisplay, missingRecipesDescriptions);
+                ItemDisplayManager.Instance.ShowDisabledDescription(itemDetailsDisplay);
             }
             else
             {
-                ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                ItemDisplayManager.Instance.HideDisabledDescription(itemDetailsDisplay);
             }
         }
 
-        public void SetEnchantmentsDescription(EnchantmentRecipeItem item, CharacterInventory inventory, CharacterUI characterUI)
+        public void SetEnchantmentsDescription(EnchantmentRecipeItem item, CharacterInventory inventory, ItemDetailsDisplay itemDetailsDisplay)
         {
             try
             {
@@ -105,13 +105,13 @@ namespace OutwardEnchantmentsViewer.Managers
                 }
 
                 ItemDisplayManager.Instance.SetHeaderText(
-                    characterUI,
+                    itemDetailsDisplay,
                     "Enchantment Properties",
                     $""
                 );
 
-                ItemDisplayManager.Instance.SetDescriptionText(characterUI, output);
-                ItemDisplayManager.Instance.ShowDescription(characterUI);
+                ItemDisplayManager.Instance.SetDescriptionText(itemDetailsDisplay, output);
+                ItemDisplayManager.Instance.ShowDescription(itemDetailsDisplay);
             }
             catch(Exception e)
             {

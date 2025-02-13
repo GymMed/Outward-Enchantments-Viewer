@@ -26,7 +26,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.1.0";
+        public const string VERSION = "0.2.0";
 
         public static string prefix = "[gymmed-Enchantments-Viewer]";
 
@@ -46,6 +46,7 @@ namespace OutwardEnchantmentsViewer
         public static ConfigEntry<bool> ShowEquipmentDescriptions;
         public static ConfigEntry<bool> ShowAllAvailableEnchantmentsCountForEquipment;
         public static ConfigEntry<bool> ShowMissingEnchantmentsForEquipment;
+        public static ConfigEntry<bool> ShowDescriptionsOnlyForInventory;
 
         // Awake is called when your plugin is created. Use this to set up your mod.
         internal void Awake()
@@ -65,6 +66,8 @@ namespace OutwardEnchantmentsViewer
             ShowAllAvailableEnchantmentsCountForEquipment = Config.Bind("Equipment Descriptions Header", "ShowAllAvailableEnchantmentsCountForEquipment", true, "Show all available enchantments count for equipment?");
             ShowMissingEnchantmentsForEquipment = Config.Bind("Equipment Descriptions Body", "ShowMissingEnchantmentsForEquipment", true, "Show missing enchantments for equipment?");
 
+            ShowDescriptionsOnlyForInventory = Config.Bind("Show Descriptions in Panels", "ShowDescriptionsOnlyForInventory", true, "Show descriptions only for items in inventory?");
+
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
             new Harmony(GUID).PatchAll();
         }
@@ -82,7 +85,7 @@ namespace OutwardEnchantmentsViewer
             static bool Prefix(ItemDetailsDisplay __instance)
             {
                 #if DEBUG
-                SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@OnScrollDownPressed called! {__instance.gameObject.FindInParents<CharacterUI>(false).gameObject.name}");
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@OnScrollDownPressed called!");
                 #endif
                 // Ensure we don't run when already moving
                 if (__instance.m_movingScrollview)
@@ -126,7 +129,7 @@ namespace OutwardEnchantmentsViewer
             static bool Prefix(ItemDetailsDisplay __instance)
             {
                 #if DEBUG
-                SL.Log($"{OutwardEnchantmentsViewer.prefix} Patch_OnScrollUpPressed called! {__instance.gameObject.FindInParents<CharacterUI>(false).gameObject.name}");
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} Patch_OnScrollUpPressed called!");
                 #endif
                 if (__instance.m_movingScrollview)
                 {
@@ -172,9 +175,9 @@ namespace OutwardEnchantmentsViewer
                 #endif
 
                 string path = Path.Combine(
-                        XmlSerializerHelper.GetProjectLocation(),
-                        "customEnchantmentsDescriptions.xml"
-                    );
+                    XmlSerializerHelper.GetProjectLocation(),
+                    "customEnchantmentsDescriptions.xml"
+                );
 
                 CustomEnchantmentsManager.Instance.LoadEnchantmentDictionaryFromXml(
                     path
@@ -184,25 +187,27 @@ namespace OutwardEnchantmentsViewer
             }
         }
 
-        [HarmonyPatch(typeof(CharacterUI))]
-        [HarmonyPatch("SetTargetCharacter", MethodType.Normal)]
-        public class CharacterUI_SetTargetCharacterPatch
+        //only in StartInit parents get their names
+        //in AwakeInit they still not assigned
+        [HarmonyPatch(typeof(ItemDetailsDisplay))]
+        [HarmonyPatch("StartInit", MethodType.Normal)]
+        public class ItemDetailsDisplay_AwakeInit
         {
             //For adding additional section in inventory UI
             [HarmonyPostfix]
-            private static void Postfix(CharacterUI __instance)
+            private static void Postfix(ItemDetailsDisplay __instance)
             {
                 try
                 {
                     #if DEBUG
-                    SL.Log($"{OutwardEnchantmentsViewer.prefix} CharacterUI@SetTargetCharacter called!");
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@StartInit called!");
                     #endif
                     new ItemDescriptionScrollFixer(__instance);
                     ItemDisplayManager.Instance.TryCreateSection(__instance);
                 }
                 catch(Exception e)
                 {
-                    SL.Log($"{OutwardEnchantmentsViewer.prefix} CharacterUI@SetTargetCharacter error: {e.Message}");
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@StartInit error: {e.Message}");
                 }
             }
         }
@@ -219,18 +224,9 @@ namespace OutwardEnchantmentsViewer
                     #if DEBUG
                     SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@RefreshDetails called!");
                     #endif
-                    CharacterUI characterUI = __instance.CharacterUI;
-
-                    if (!characterUI)
-                    {
-                        #if DEBUG
-                        SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@RefreshDetails missing CharacterUI on itemDisplay");
-                        #endif
-                        return;
-                    }
 
                     Item item = __instance.itemDisplay?.RefItem;
-                    ItemDisplayManager.Instance.ShowOriginalDescription(characterUI);
+                    ItemDisplayManager.Instance.ShowOriginalDescription(__instance);
 
                     CharacterInventory inventory = __instance.LocalCharacter?.Inventory;
 
@@ -242,35 +238,44 @@ namespace OutwardEnchantmentsViewer
                         return;
                     }
 
+                    //checks if item is not being sold
+                    if (OutwardEnchantmentsViewer.ShowDescriptionsOnlyForInventory.Value &&
+                        item.m_lastParentItemContainer != null && item.m_lastParentItemContainer is MerchantPouch)
+                    {
+                        ItemDisplayManager.Instance.HideDescription(__instance);
+                        ItemDisplayManager.Instance.HideDisabledDescription(__instance);
+                        return;
+                    }
+
                     switch(item)
                     {
                         case Equipment equipment:
                             {
                                 if (!ShowEquipmentDescriptions.Value || item.IsNonEnchantable)
                                 {
-                                    ItemDisplayManager.Instance.HideDescription(characterUI);
-                                    ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                                    ItemDisplayManager.Instance.HideDescription(__instance);
+                                    ItemDisplayManager.Instance.HideDisabledDescription(__instance);
                                     return;
                                 }
-                                ItemDescriptionsManager.Instance.SetEquipmentsEnchantmentsDescription(item, inventory, characterUI);
+                                ItemDescriptionsManager.Instance.SetEquipmentsEnchantmentsDescription(item, inventory, __instance);
                                 break;
                             }
                         case EnchantmentRecipeItem enchantmentRecipeItem:
                             {
                                 if (!ShowEnchantmentDescriptions.Value)
                                 {
-                                    ItemDisplayManager.Instance.HideDescription(characterUI);
-                                    ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                                    ItemDisplayManager.Instance.HideDescription(__instance);
+                                    ItemDisplayManager.Instance.HideDisabledDescription(__instance);
                                     return;
                                 }
-                                ItemDescriptionsManager.Instance.SetEnchantmentsDescription(enchantmentRecipeItem, inventory, characterUI);
-                                ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                                ItemDescriptionsManager.Instance.SetEnchantmentsDescription(enchantmentRecipeItem, inventory, __instance);
+                                ItemDisplayManager.Instance.HideDisabledDescription(__instance);
                                 break;
                             }
                         default:
                             {
-                                ItemDisplayManager.Instance.HideDescription(characterUI);
-                                ItemDisplayManager.Instance.HideDisabledDescription(characterUI);
+                                ItemDisplayManager.Instance.HideDescription(__instance);
+                                ItemDisplayManager.Instance.HideDisabledDescription(__instance);
                                 return;
                             }
                     }

@@ -26,9 +26,9 @@ namespace OutwardEnchantmentsViewer.UI
         Text _disabledDescriptionText;
         Row _headerRow;
 
-        public ItemDisplaySection(CharacterUI characterUI)
+        public ItemDisplaySection(ItemDetailsDisplay itemDetailsDisplay)
         {
-            CreateSection(characterUI);
+            CreateSection(itemDetailsDisplay);
             HideDescription();
         }
 
@@ -125,9 +125,9 @@ namespace OutwardEnchantmentsViewer.UI
             DisabledDescriptionText.text = text;
         }
 
-        private void CreateSection(CharacterUI characterUI)
+        private void CreateSection(ItemDetailsDisplay itemDetailsDisplay)
         {
-            Transform itemDescriptionUI = characterUI.transform.Find("Canvas/GameplayPanels/Menus/CharacterMenus/MainPanel/Content/MiddlePanel/Inventory/DetailPanel/ItemDetailsPanel/ItemDetails/Stats/Scroll View/Viewport");
+            Transform itemDescriptionUI = itemDetailsDisplay.transform.Find("ItemDetails/Stats/Scroll View/Viewport");
 
             if (!itemDescriptionUI)
             {

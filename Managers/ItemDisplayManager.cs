@@ -12,7 +12,7 @@ namespace OutwardEnchantmentsViewer.Managers
 {
     public class ItemDisplayManager
     {
-        Dictionary<CharacterUI, ItemDisplaySection> _dictionaryDisplaySections = new Dictionary<CharacterUI, ItemDisplaySection>();
+        Dictionary<ItemDetailsDisplay, ItemDisplaySection> _dictionaryDisplaySections = new Dictionary<ItemDetailsDisplay, ItemDisplaySection>();
         private static ItemDisplayManager _instance;
 
         private ItemDisplayManager()
@@ -30,21 +30,21 @@ namespace OutwardEnchantmentsViewer.Managers
             }
         }
 
-        public Dictionary<CharacterUI, ItemDisplaySection> DictionaryDisplaySections { get => _dictionaryDisplaySections; set => _dictionaryDisplaySections = value; }
+        public Dictionary<ItemDetailsDisplay, ItemDisplaySection> DictionaryDisplaySections { get => _dictionaryDisplaySections; set => _dictionaryDisplaySections = value; }
 
-        public void TryCreateSection(CharacterUI characterUI)
+        public void TryCreateSection(ItemDetailsDisplay itemDetailsDisplay)
         {
-            DictionaryDisplaySections.TryGetValue(characterUI, out ItemDisplaySection itemSectionUI);
+            DictionaryDisplaySections.TryGetValue(itemDetailsDisplay, out ItemDisplaySection itemSectionUI);
 
             if (itemSectionUI != null)
                 return;
 
-            DictionaryDisplaySections.Add(characterUI, new ItemDisplaySection(characterUI));
+            DictionaryDisplaySections.Add(itemDetailsDisplay, new ItemDisplaySection(itemDetailsDisplay));
         }
 
-        public void ShowDescription(CharacterUI characterUI, bool hideOrginalDescription = false)
+        public void ShowDescription(ItemDetailsDisplay itemDetailsDisplay, bool hideOrginalDescription = false)
         {
-            ItemDisplaySection itemDisplaySection = GetItemDisplaySection(characterUI);
+            ItemDisplaySection itemDisplaySection = GetItemDisplaySection(itemDetailsDisplay);
             itemDisplaySection.ShowDescription();
 
             if(hideOrginalDescription) 
@@ -53,52 +53,52 @@ namespace OutwardEnchantmentsViewer.Managers
             }
         }
 
-        public void ShowDisabledDescription(CharacterUI characterUI)
+        public void ShowDisabledDescription(ItemDetailsDisplay itemDetailsDisplay)
         {
-            GetItemDisplaySection(characterUI).ShowDisabledDescription();
+            GetItemDisplaySection(itemDetailsDisplay).ShowDisabledDescription();
         }
 
-        public void HideDisabledDescription(CharacterUI characterUI)
+        public void HideDisabledDescription(ItemDetailsDisplay itemDetailsDisplay)
         {
-            GetItemDisplaySection(characterUI).HideDisabledDescription();
+            GetItemDisplaySection(itemDetailsDisplay).HideDisabledDescription();
         }
 
-        public void ShowOriginalDescription(CharacterUI characterUI)
+        public void ShowOriginalDescription(ItemDetailsDisplay itemDetailsDisplay)
         {
-            GetItemDisplaySection(characterUI).ShowOriginalDescription();
+            GetItemDisplaySection(itemDetailsDisplay).ShowOriginalDescription();
         }
 
-        public void HideOriginalDescription(CharacterUI characterUI)
+        public void HideOriginalDescription(ItemDetailsDisplay itemDetailsDisplay)
         {
-            GetItemDisplaySection(characterUI).HideOriginalDescription();
+            GetItemDisplaySection(itemDetailsDisplay).HideOriginalDescription();
         }
 
-        public void HideDescription(CharacterUI characterUI)
+        public void HideDescription(ItemDetailsDisplay itemDetailsDisplay)
         {
-            GetItemDisplaySection(characterUI).HideDescription();
+            GetItemDisplaySection(itemDetailsDisplay).HideDescription();
         }
 
-        public void SetDescriptionText(CharacterUI characterUI, string text)
+        public void SetDescriptionText(ItemDetailsDisplay itemDetailsDisplay, string text)
         {
-            GetItemDisplaySection(characterUI).SetDescriptiontext(text);
+            GetItemDisplaySection(itemDetailsDisplay).SetDescriptiontext(text);
         }
 
-        public void SetDisabledDescriptionText(CharacterUI characterUI, string text)
+        public void SetDisabledDescriptionText(ItemDetailsDisplay itemDetailsDisplay, string text)
         {
-            GetItemDisplaySection(characterUI).SetDisabledDescriptiontext(text);
+            GetItemDisplaySection(itemDetailsDisplay).SetDisabledDescriptiontext(text);
         }
 
-        public void SetHeaderText(CharacterUI characterUI, string leftText, string rightText)
+        public void SetHeaderText(ItemDetailsDisplay itemDetailsDisplay, string leftText, string rightText)
         {
-            GetItemDisplaySection(characterUI).SetHeaderText(leftText, rightText);
+            GetItemDisplaySection(itemDetailsDisplay).SetHeaderText(leftText, rightText);
         }
 
-        public ItemDisplaySection GetItemDisplaySection(CharacterUI characterUI)
+        public ItemDisplaySection GetItemDisplaySection(ItemDetailsDisplay itemDetailsDisplay)
         {
-            DictionaryDisplaySections.TryGetValue(characterUI, out ItemDisplaySection itemSectionUI);
+            DictionaryDisplaySections.TryGetValue(itemDetailsDisplay, out ItemDisplaySection itemSectionUI);
 
             if (itemSectionUI == null)
-                throw new Exception("Tried to retrieve missing characterUI from dictionary!");
+                throw new Exception("Tried to retrieve missing itemDetailsDisplay from dictionary!");
 
             return itemSectionUI;
         }

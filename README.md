@@ -40,6 +40,7 @@ The **Outward Enchantments Viewer Mod** has you covered!
    - **ShowEquipmentDescriptions** – Toggle the display of enchantments on equipment.  
    - **ShowAllAvailableEnchantmentsCountForEquipment** – Choose whether to show the total number of enchantments available for each piece of equipment.  
    - **ShowMissingEnchantmentsForEquipment** – Decide if missing enchantments for equipment should be displayed.  
+   - **ShowDescriptionsOnlyForInventory** – Restrict enchantment descriptions to items currently in the player’s inventory, hiding details for items in shops.  
 
 ## How to use
 
