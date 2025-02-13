@@ -66,7 +66,7 @@ namespace OutwardEnchantmentsViewer
             ShowAllAvailableEnchantmentsCountForEquipment = Config.Bind("Equipment Descriptions Header", "ShowAllAvailableEnchantmentsCountForEquipment", true, "Show all available enchantments count for equipment?");
             ShowMissingEnchantmentsForEquipment = Config.Bind("Equipment Descriptions Body", "ShowMissingEnchantmentsForEquipment", true, "Show missing enchantments for equipment?");
 
-            ShowDescriptionsOnlyForInventory = Config.Bind("Show Descriptions in Panels", "ShowDescriptionsOnlyForInventory", true, "Show descriptions only for items in inventory?");
+            ShowDescriptionsOnlyForInventory = Config.Bind("Show Descriptions in Panels", "ShowDescriptionsOnlyForInventory", false, "Show descriptions only for items in inventory?");
 
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
             new Harmony(GUID).PatchAll();
