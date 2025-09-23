@@ -56,6 +56,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             string additionalText = "";
             string statModificationName = "";
             string finalValueString = "";
+            int roundedBaseValue = 0;
 
             #if DEBUG
             output += $"Stats Modifications {stats.Count}\n";
@@ -65,21 +66,22 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             {
                 additionalText = stat.Type == Enchantment.StatModification.BonusType.Modifier ? "%" : "";
                 statModificationName = Regex.Replace(stat.Name.ToString(), "(?<!^)([A-Z])", " $1");
+                roundedBaseValue = (int)Math.Round(GetStatValueFromEquipment(equipment, stat), MidpointRounding.AwayFromZero);
 
                 if (stat.Name == Enchantment.Stat.Weight)
                 {
                     finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
 
                     if(stat.Type == Enchantment.StatModification.BonusType.Modifier)
-                        output += $"{GetStatValueFromEquipment(equipment, stat)} => {finalValueString} {statModificationName} ({stat.Value}%)\n";
+                        output += $"{roundedBaseValue} => {finalValueString} {statModificationName} ({stat.Value}%)\n";
                     else
-                        output += $"{GetStatValueFromEquipment(equipment, stat)} => {finalValueString} {statModificationName}\n";
+                        output += $"{roundedBaseValue} => {finalValueString} {statModificationName}\n";
                 }
                 else
                 {
                     finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
 
-                    output += $"{GetStatValueFromEquipment(equipment, stat)}{additionalText} => {finalValueString} {statModificationName}\n";
+                    output += $"{roundedBaseValue}{additionalText} => {finalValueString} {statModificationName}\n";
                 }
             }
 
@@ -126,7 +128,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 case Enchantment.Stat.StaminaCostReduction:
                 case Enchantment.Stat.MovementSpeed:
                 {
-                    return (totalValue + stat.Value).ToString() + "%";
+                    return ((int)Math.Round(totalValue + stat.Value, MidpointRounding.AwayFromZero)).ToString() + "%";
                 }
                 default:
                         {
@@ -224,7 +226,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
                 roundedTotal = (int)Math.Round(baseDamage + type.Damage, MidpointRounding.AwayFromZero);
 
-                output += $"{(int)Math.Round(baseDamage, MidpointRounding.AwayFromZero)} => {roundedTotal} {type.Type}\n";
+                output += $"{(int)Math.Round(baseDamage, MidpointRounding.AwayFromZero)} => {roundedTotal} {type.Type} Damage Bonus\n";
             }
 
             return output;
@@ -550,7 +552,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             {
                 baseResistance = equipment.GetDamageResistance(type.Type);
                 roundedTotal = (int)Math.Round(baseResistance + type.Damage, MidpointRounding.AwayFromZero);
-                output += $"{baseResistance}% => {roundedTotal}% {type.Type} resistance\n";
+                output += $"{(int)Math.Round(baseResistance, MidpointRounding.AwayFromZero)}% => {roundedTotal}% {type.Type} resistance\n";
             }
 
             return output;
@@ -685,7 +687,11 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 output += $"\nType: {effect.GetType()}";
             }
 
-            output += "\n";
+            if (!output.EndsWith("\n"))
+            {
+                output += "\n";
+            }
+
             return output;
         }
 
@@ -733,7 +739,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             output += $"Euipment now provides {currentStatusResistance.StatusEffect.StatusName} " + 
                 $"({currentStatusResistance.Value}% buildup) resistance";
 
-            for(int currentResistancesEffect = 0; currentResistancesEffect < derivedResistancesLengthMinusOne; currentResistancesEffect++)
+            for(int currentResistancesEffect = 1; currentResistancesEffect < derivedResistancesLengthMinusOne; currentResistancesEffect++)
             {
                 currentStatusResistance = derivedStatusResistances[currentResistancesEffect];
 
