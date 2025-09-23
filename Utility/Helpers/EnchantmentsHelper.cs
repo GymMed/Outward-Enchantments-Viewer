@@ -1,4 +1,5 @@
 ﻿using OutwardEnchantmentsViewer.Enchantments;
+using OutwardEnchantmentsViewer.Utility.Enums;
 using SideLoader;
 using System;
 using System.Collections.Generic;
@@ -16,31 +17,75 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             {
                 if(data.SpecificIngredient is Armor armor)
                 {
-                    return armor.EquipSlot.ToString();
+                    return EquipmentSlotIDsExtensions.GetArmorTypeName(armor.EquipSlot);
                 }
                 else if(data.SpecificIngredient is Weapon weapon)
                 {
-                    return weapon.TypeDisplay.ToString();
+                    return WeaponTypeExtensions.GetWeaponTypeName(weapon.Type);
                 }
             }
 
             return "";
         }
         
-        public static string GetEnchantmentDescription(EnchantmentRecipeItem enchantmentItem)
+        public static string GetDetailedEnchantmentDescription(EnchantmentRecipeItem enchantmentItem, Equipment equipment, int count = 1)
         {
-            string output = $"{enchantmentItem.Name} \n"; ;
-            //fill
+            string output = $"{enchantmentItem.Name}";
+
+            if (count > 1)
+                output += $" ({count})";
+
+            output += "\n";
+            Enchantment enchantment = null;
+
+            foreach (EnchantmentRecipe recipe in enchantmentItem.Recipes)
+            {
+                if(recipe.GetHasMatchingEquipment(equipment))
+                {
+                    enchantment = ResourcesPrefabManager.Instance.GetEnchantmentPrefab(recipe.RecipeID);
+                    break;
+                }
+            }
+
+            if (enchantment == null)
+                return output;
+
+            output += ItemEnchantmentInformationHelper.BuildDescriptions(enchantment, equipment);
+
             return output;
         }
 
-        public static string GetEnchantmentsDescriptions(List<EnchantmentRecipeData> enchantmentRecipesDatas)
+        public static string GetDetailedEnchantmentsDescriptions(List<EnchantmentRecipeDetailedData> enchantmentRecipesDatas, Equipment equipment)
         {
             string output = "";
 
-            foreach(EnchantmentRecipeData enchantmentRecipeData in enchantmentRecipesDatas)
+            foreach(EnchantmentRecipeDetailedData enchantmentRecipeData in enchantmentRecipesDatas)
             {
-                output += GetEnchantmentDescription(enchantmentRecipeData.item);
+                output += GetDetailedEnchantmentDescription(enchantmentRecipeData.Data.item, equipment, enchantmentRecipeData.Count);
+            }
+
+            return output;
+        }
+
+        public static string GetEnchantmentDescription(EnchantmentRecipeItem enchantmentItem, int count)
+        {
+            string output = $"{enchantmentItem.Name}";
+
+            if (count > 1)
+                output += $" ({count})";
+
+            output += "\n";
+
+            return output;
+        }
+
+        public static string GetEnchantmentsDescriptions(List<EnchantmentRecipeDetailedData> enchantmentRecipesDatas)
+        {
+            string output = "";
+
+            foreach(EnchantmentRecipeDetailedData enchantmentRecipeData in enchantmentRecipesDatas)
+            {
+                output += GetEnchantmentDescription(enchantmentRecipeData.Data.item, enchantmentRecipeData.Count);
             }
 
             return output;
@@ -60,12 +105,34 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             return output;
         }
 
+        public static string GetDetailedEnchantmentsDescriptions(List<EnchantmentRecipe> enchantmentRecipes, Equipment equipment)
+        {
+            string output = "";
+            Enchantment enchantment = null;
+
+            foreach (EnchantmentRecipe recipe in enchantmentRecipes)
+            {
+                if(recipe.GetHasMatchingEquipment(equipment))
+                {
+                    enchantment = ResourcesPrefabManager.Instance.GetEnchantmentPrefab(recipe.RecipeID);
+
+                    if (enchantment == null)
+                        continue;
+
+                    output += $"Enchanting: {enchantment.Name} \n";
+                    output += ItemEnchantmentInformationHelper.BuildDescriptions(enchantment, equipment);
+                }
+            }
+
+            return output;
+        }
+
         //includes pouch, backpack and equiped items
-        public static List<EnchantmentRecipeData> GetAvailableEnchantmentRecipeDatasInInventory(Item item, CharacterInventory inventory)
+        public static List<EnchantmentRecipeDetailedData> GetUniqueAvailableEnchantmentRecipeDatasInInventory(Item item, CharacterInventory inventory)
         {
             List<Item> inventoryItems = ItemHelpers.GetUniqueItemsInInventory(inventory);
             List<EnchantmentRecipeItem> enchantments = ItemHelpers.GetAllItemsOfType<EnchantmentRecipeItem>(inventoryItems);
-            List<EnchantmentRecipeData> haveEnchantments = new List<EnchantmentRecipeData>();
+            Dictionary<int, EnchantmentRecipeDetailedData> haveEnchantments = new Dictionary<int, EnchantmentRecipeDetailedData>();
 
             foreach (EnchantmentRecipeItem enchantmentRecipeItem in enchantments)
             {
@@ -76,12 +143,20 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                         #if DEBUG
                         SL.Log($"{OutwardEnchantmentsViewer.prefix} equiment {item.Name} can be enchanted with {enchantmentRecipe.name} and {enchantmentRecipeItem.Name}, {enchantmentRecipeItem.name}");
                         #endif
-                        haveEnchantments.Add(new EnchantmentRecipeData( enchantmentRecipeItem, enchantmentRecipe ));
+                        if (haveEnchantments.TryGetValue(enchantmentRecipe.RecipeID, out var existing))
+                        {
+                            existing.Count++;
+                        }
+                        else
+                        {
+                            haveEnchantments[enchantmentRecipe.RecipeID] = new EnchantmentRecipeDetailedData(
+                                new EnchantmentRecipeData(enchantmentRecipeItem, enchantmentRecipe), 1);
+                        }
                     }
                 }
             }
 
-            return haveEnchantments;
+            return haveEnchantments.Values.ToList();
         }
 
         //includes pouch, backpack and equiped items

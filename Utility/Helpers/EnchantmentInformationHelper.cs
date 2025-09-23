@@ -14,7 +14,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         {
             string output = "";
 
-            if (enchantment.DamageBonus.Count < 1)
+            if (enchantment.DamageBonus == null || enchantment.DamageBonus.Count < 1)
                 return output;
             
             #if DEBUG
@@ -68,7 +68,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         {
             string output = "";
 
-            if (enchantment.DamageModifier.Count < 1)
+            if (enchantment.DamageModifier == null || enchantment.DamageModifier.Count < 1)
                 return output;
 
             #if DEBUG
@@ -121,7 +121,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         {
             string output = "";
 
-            if (enchantment.AdditionalDamages.Count() < 1)
+            if (enchantment.AdditionalDamages == null || enchantment.AdditionalDamages.Count() < 1)
                 return output;
 
             #if DEBUG
@@ -148,7 +148,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         {
             string output = "";
 
-            if (enchantment.StatModifications.Count < 1)
+            if (enchantment.StatModifications == null || enchantment.StatModifications.Count < 1)
                 return output;
 
             #if DEBUG
@@ -205,7 +205,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         {
             string output = "";
 
-            if (enchantment.ElementalResistances.Count < 1)
+            if (enchantment.ElementalResistances == null || enchantment.ElementalResistances.Count < 1)
                 return output;
 
             #if DEBUG

@@ -26,7 +26,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.2.0";
+        public const string VERSION = "0.3.0";
 
         public static string prefix = "[gymmed-Enchantments-Viewer]";
 
@@ -47,6 +47,8 @@ namespace OutwardEnchantmentsViewer
         public static ConfigEntry<bool> ShowAllAvailableEnchantmentsCountForEquipment;
         public static ConfigEntry<bool> ShowMissingEnchantmentsForEquipment;
         public static ConfigEntry<bool> ShowDescriptionsOnlyForInventory;
+        public static ConfigEntry<bool> ShowEquipmentOwnedEnchantmentsDetailed;
+        public static ConfigEntry<bool> ShowEquipmentUnownedEnchantmentsDetailed;
 
         // Awake is called when your plugin is created. Use this to set up your mod.
         internal void Awake()
@@ -67,6 +69,22 @@ namespace OutwardEnchantmentsViewer
             ShowMissingEnchantmentsForEquipment = Config.Bind("Equipment Descriptions Body", "ShowMissingEnchantmentsForEquipment", true, "Show missing enchantments for equipment?");
 
             ShowDescriptionsOnlyForInventory = Config.Bind("Show Descriptions in Panels", "ShowDescriptionsOnlyForInventory", false, "Show descriptions only for items in inventory?");
+
+            ShowEquipmentDescriptions = Config.Bind("Equipment Descriptions", "ShowEquipmentEnchantmentsDescriptions", true, "Show enchantments for equipment?");
+
+            ShowEquipmentOwnedEnchantmentsDetailed = Config.Bind(
+                "Equipment Descriptions",
+                "ShowEquipmentOwnedEnchantmentsDetailed",
+                true,
+                "Show owned equipment enchantments in greater detail."
+            );
+
+            ShowEquipmentUnownedEnchantmentsDetailed = Config.Bind(
+                "Equipment Descriptions",
+                "ShowEquipmentUnownedEnchantmentsDetailed",
+                true,
+                "Show unowned equipment enchantments in greater detail."
+            );
 
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
             new Harmony(GUID).PatchAll();

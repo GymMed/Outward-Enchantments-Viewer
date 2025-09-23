@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using UnityEngine.Networking.Match;
 
 namespace OutwardEnchantmentsViewer.Managers
 {
@@ -35,14 +36,23 @@ namespace OutwardEnchantmentsViewer.Managers
         public void SetEquipmentsEnchantmentsDescription(Item item, CharacterInventory inventory, ItemDetailsDisplay itemDetailsDisplay)
         {
             List<EnchantmentRecipe> availableEnchantments = EnchantmentsHelper.GetAvailableEnchantmentRecipies(item);
-            List<EnchantmentRecipeData> haveEnchantmentsDatas = EnchantmentsHelper.GetAvailableEnchantmentRecipeDatasInInventory(item, inventory);
-            List<EnchantmentRecipe> haveEnchantments = haveEnchantmentsDatas
-                .Select(data => data.enchantmentRecipe)
+            List<EnchantmentRecipeDetailedData> haveEnchantmentsDetailedDatas = EnchantmentsHelper.GetUniqueAvailableEnchantmentRecipeDatasInInventory(item, inventory);
+            List<EnchantmentRecipe> haveEnchantments = haveEnchantmentsDetailedDatas
+                .Select(data => data.Data.enchantmentRecipe)
                 .ToList();
 
-            string haveRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(haveEnchantmentsDatas);
+            string haveRecipesDescriptions = "";
 
-            string headerRightText = "Unlocked Enchantments";
+            if (item is Equipment equipment && OutwardEnchantmentsViewer.ShowEquipmentOwnedEnchantmentsDetailed.Value)
+            {
+                haveRecipesDescriptions = EnchantmentsHelper.GetDetailedEnchantmentsDescriptions(haveEnchantmentsDetailedDatas, equipment);
+            }
+            else
+            {
+                haveRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(haveEnchantmentsDetailedDatas);
+            }
+
+            string headerRightText = "Know Enchantments";
 
             string headerLeftText = haveEnchantments.Count.ToString();
 
@@ -66,8 +76,17 @@ namespace OutwardEnchantmentsViewer.Managers
                 return;
             }
 
+            string missingRecipesDescriptions = "";
             List<EnchantmentRecipe> missingEnchantments = EnchantmentsHelper.GetMissingEnchantments(availableEnchantments, haveEnchantments);
-            string missingRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(missingEnchantments);
+
+            if (item is Equipment equipmentItem && OutwardEnchantmentsViewer.ShowEquipmentUnownedEnchantmentsDetailed.Value)
+            {
+                missingRecipesDescriptions = EnchantmentsHelper.GetDetailedEnchantmentsDescriptions(missingEnchantments, equipmentItem);
+            }
+            else
+            {
+                missingRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(missingEnchantments);
+            }
 
             if(missingEnchantments.Count > 0)
             {
@@ -228,7 +247,17 @@ namespace OutwardEnchantmentsViewer.Managers
                 output += $"Track Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n\n";
             }
 
+            if (!string.IsNullOrWhiteSpace(enchantment.Description))
+            {
+                output += $"{enchantment.Description} \n\n";
+            }
+
             output += CustomEnchantmentsDescriptionsExtensions.GetDescription(enchantment.PresetID);
+
+            if(output == "")
+            {
+                return "Doesn't give stats in traditional way and uses unknown properties";
+            }
 
             return output;
         }

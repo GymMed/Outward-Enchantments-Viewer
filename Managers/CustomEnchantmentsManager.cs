@@ -53,7 +53,7 @@ namespace OutwardEnchantmentsViewer.Managers
         {
             try
             {
-                EnchantmentDescriptionsControllerJson container = XmlSerializerHelper.DeserializeXML<EnchantmentDescriptionsControllerJson>(filePath);
+                EnchantmentDescriptionsControllerXml container = XmlSerializerHelper.DeserializeXML<EnchantmentDescriptionsControllerXml>(filePath);
 
                 if (container == null || container.enchantments == null || container.enchantments.Count < 1)
                 {

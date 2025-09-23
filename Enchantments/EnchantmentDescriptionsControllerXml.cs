@@ -9,7 +9,7 @@ namespace OutwardEnchantmentsViewer.Enchantments
 {
     [Serializable]
     [XmlRoot("root")]
-    public class EnchantmentDescriptionsControllerJson
+    public class EnchantmentDescriptionsControllerXml
     {
         [XmlArray("enchantments")]
         [XmlArrayItem("enchantment")]
