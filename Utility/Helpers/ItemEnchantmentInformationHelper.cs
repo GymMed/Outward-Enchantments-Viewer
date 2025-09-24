@@ -198,7 +198,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             if(output == "" && previousInput == "")
             {
-                return "Doesn't give stats in traditional way and uses unknown properties";
+                return "Doesn't give stats in traditional way and uses unknown properties \n";
             }
 
             return output;
@@ -346,7 +346,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
                 if (methodsOutput != "")
                 {
-                    output += $"\n{methodsOutput}\n";
+                    output += $"{methodsOutput}";
                 }
 
                 return output;

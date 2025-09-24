@@ -52,6 +52,17 @@ namespace OutwardEnchantmentsViewer.Managers
                 haveRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(haveEnchantmentsDetailedDatas);
             }
 
+            bool startNewLineMissingRecipies = false;
+
+            if(!string.IsNullOrEmpty(haveRecipesDescriptions))
+            {
+                haveRecipesDescriptions = "\n" + haveRecipesDescriptions;
+            }
+            else
+            {
+                startNewLineMissingRecipies = true;
+            }
+
             string headerRightText = "Know Enchantments";
 
             string headerLeftText = haveEnchantments.Count.ToString();
@@ -67,8 +78,8 @@ namespace OutwardEnchantmentsViewer.Managers
                 headerLeftText
             );
 
+            ItemDisplayManager.Instance.ShowDescriptionContainer(itemDetailsDisplay, String.IsNullOrEmpty(item.Description));
             ItemDisplayManager.Instance.SetDescriptionText(itemDetailsDisplay, haveRecipesDescriptions);
-            ItemDisplayManager.Instance.ShowDescription(itemDetailsDisplay, String.IsNullOrEmpty(item.Description));
 
             if(!OutwardEnchantmentsViewer.ShowMissingEnchantmentsForEquipment.Value)
             {
@@ -76,16 +87,16 @@ namespace OutwardEnchantmentsViewer.Managers
                 return;
             }
 
-            string missingRecipesDescriptions = "";
+            string missingRecipesDescriptions = startNewLineMissingRecipies ? "\n" : "";
             List<EnchantmentRecipe> missingEnchantments = EnchantmentsHelper.GetMissingEnchantments(availableEnchantments, haveEnchantments);
 
             if (item is Equipment equipmentItem && OutwardEnchantmentsViewer.ShowEquipmentUnownedEnchantmentsDetailed.Value)
             {
-                missingRecipesDescriptions = EnchantmentsHelper.GetDetailedEnchantmentsDescriptions(missingEnchantments, equipmentItem);
+                missingRecipesDescriptions += EnchantmentsHelper.GetDetailedEnchantmentsDescriptions(missingEnchantments, equipmentItem);
             }
             else
             {
-                missingRecipesDescriptions = EnchantmentsHelper.GetEnchantmentsDescriptions(missingEnchantments);
+                missingRecipesDescriptions += EnchantmentsHelper.GetEnchantmentsDescriptions(missingEnchantments);
             }
 
             if(missingEnchantments.Count > 0)
@@ -104,7 +115,7 @@ namespace OutwardEnchantmentsViewer.Managers
             try
             {
                 //List<Item> inventoryItems = GetUniqueItemsInInventory(inventory);
-                string output = "";
+                string output = "\n";
 
                 foreach (EnchantmentRecipe recipe in item.Recipes)
                 {
@@ -129,8 +140,8 @@ namespace OutwardEnchantmentsViewer.Managers
                     $""
                 );
 
+                ItemDisplayManager.Instance.ShowDescriptionContainer(itemDetailsDisplay);
                 ItemDisplayManager.Instance.SetDescriptionText(itemDetailsDisplay, output);
-                ItemDisplayManager.Instance.ShowDescription(itemDetailsDisplay);
             }
             catch(Exception e)
             {

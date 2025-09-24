@@ -58,10 +58,17 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         public static string GetDetailedEnchantmentsDescriptions(List<EnchantmentRecipeDetailedData> enchantmentRecipesDatas, Equipment equipment)
         {
             string output = "";
+            int enchantmentRecipesDatasMinusOne = enchantmentRecipesDatas.Count - 1;
 
-            foreach(EnchantmentRecipeDetailedData enchantmentRecipeData in enchantmentRecipesDatas)
+            for(int currentRecipeData = 0; currentRecipeData < enchantmentRecipesDatasMinusOne; currentRecipeData++)
             {
-                output += GetDetailedEnchantmentDescription(enchantmentRecipeData.Data.item, equipment, enchantmentRecipeData.Count);
+                output += GetDetailedEnchantmentDescription(enchantmentRecipesDatas[currentRecipeData].Data.item, equipment, enchantmentRecipesDatas[currentRecipeData].Count);
+                output += "\n";
+            }
+
+            if(enchantmentRecipesDatas.Count > 0)
+            {
+                output += GetDetailedEnchantmentDescription(enchantmentRecipesDatas[enchantmentRecipesDatasMinusOne].Data.item, equipment, enchantmentRecipesDatas[enchantmentRecipesDatasMinusOne].Count);
             }
 
             return output;
@@ -108,20 +115,37 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         public static string GetDetailedEnchantmentsDescriptions(List<EnchantmentRecipe> enchantmentRecipes, Equipment equipment)
         {
             string output = "";
-            Enchantment enchantment = null;
+            
+            int enchantmentRecipesMinusOne = enchantmentRecipes.Count - 1;
 
-            foreach (EnchantmentRecipe recipe in enchantmentRecipes)
+            for(int currentRecipe = 0; currentRecipe < enchantmentRecipesMinusOne; currentRecipe++)
             {
-                if(recipe.GetHasMatchingEquipment(equipment))
-                {
-                    enchantment = ResourcesPrefabManager.Instance.GetEnchantmentPrefab(recipe.RecipeID);
+                output += GetDetailedEnchantmentDescription(enchantmentRecipes[currentRecipe], equipment);
+                output += "\n";
+            }
 
-                    if (enchantment == null)
-                        continue;
+            if(enchantmentRecipes.Count > 0)
+            {
+                output += GetDetailedEnchantmentDescription(enchantmentRecipes[enchantmentRecipesMinusOne], equipment);
+            }
 
-                    output += $"Enchanting: {enchantment.Name} \n";
-                    output += ItemEnchantmentInformationHelper.BuildDescriptions(enchantment, equipment);
-                }
+
+            return output;
+        }
+
+        public static string GetDetailedEnchantmentDescription(EnchantmentRecipe enchantmentRecipe, Equipment equipment)
+        {
+            string output = "";
+
+            if(enchantmentRecipe.GetHasMatchingEquipment(equipment))
+            {
+                Enchantment enchantment = ResourcesPrefabManager.Instance.GetEnchantmentPrefab(enchantmentRecipe.RecipeID);
+
+                if (enchantment == null)
+                    return output;
+
+                output += $"Enchanting: {enchantment.Name} \n";
+                output += ItemEnchantmentInformationHelper.BuildDescriptions(enchantment, equipment);
             }
 
             return output;

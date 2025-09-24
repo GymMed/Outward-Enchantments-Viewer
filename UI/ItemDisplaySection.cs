@@ -67,6 +67,17 @@ namespace OutwardEnchantmentsViewer.UI
             DisabledDescription.gameObject.SetActive(false);
         }
 
+        public void ShowEnabledDescription()
+        {
+            Description.gameObject.SetActive(true);
+        }
+
+        public void HideEnabledDescription()
+        {
+            Description.gameObject.SetActive(false);
+        }
+
+
         public void ShowOriginalDescription()
         {
             OriginalSeparator.gameObject.SetActive(true);
@@ -110,6 +121,11 @@ namespace OutwardEnchantmentsViewer.UI
             }
 
             DescriptionText.text = text;
+
+            if (string.IsNullOrWhiteSpace(text))
+                HideEnabledDescription();
+            else
+                ShowEnabledDescription();
         }
 
         public void SetDisabledDescriptiontext(string text)
@@ -123,6 +139,11 @@ namespace OutwardEnchantmentsViewer.UI
             }
 
             DisabledDescriptionText.text = text;
+
+            if (string.IsNullOrWhiteSpace(text))
+                HideDisabledDescription();
+            else
+                ShowDisabledDescription();
         }
 
         private void CreateSection(ItemDetailsDisplay itemDetailsDisplay)

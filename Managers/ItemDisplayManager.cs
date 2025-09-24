@@ -42,7 +42,7 @@ namespace OutwardEnchantmentsViewer.Managers
             DictionaryDisplaySections.Add(itemDetailsDisplay, new ItemDisplaySection(itemDetailsDisplay));
         }
 
-        public void ShowDescription(ItemDetailsDisplay itemDetailsDisplay, bool hideOrginalDescription = false)
+        public void ShowDescriptionContainer(ItemDetailsDisplay itemDetailsDisplay, bool hideOrginalDescription = false)
         {
             ItemDisplaySection itemDisplaySection = GetItemDisplaySection(itemDetailsDisplay);
             itemDisplaySection.ShowDescription();
