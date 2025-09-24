@@ -26,7 +26,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.3.2";
+        public const string VERSION = "0.3.3";
 
         public static string prefix = "[gymmed-Enchantments-Viewer]";
 

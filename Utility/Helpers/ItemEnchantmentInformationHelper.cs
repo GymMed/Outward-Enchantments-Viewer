@@ -56,6 +56,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             string additionalText = "";
             string statModificationName = "";
             string finalValueString = "";
+            float baseValue = 0;
             int roundedBaseValue = 0;
 
             #if DEBUG
@@ -66,22 +67,43 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             {
                 additionalText = stat.Type == Enchantment.StatModification.BonusType.Modifier ? "%" : "";
                 statModificationName = Regex.Replace(stat.Name.ToString(), "(?<!^)([A-Z])", " $1");
-                roundedBaseValue = (int)Math.Round(GetStatValueFromEquipment(equipment, stat), MidpointRounding.AwayFromZero);
+                baseValue = GetStatValueFromEquipment(equipment, stat);
+                roundedBaseValue = (int)Math.Round(baseValue, MidpointRounding.AwayFromZero);
 
-                if (stat.Name == Enchantment.Stat.Weight)
+                switch (stat.Name)
                 {
-                    finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
+                    case Enchantment.Stat.Weight:
+                        {
+                            finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
 
-                    if(stat.Type == Enchantment.StatModification.BonusType.Modifier)
-                        output += $"{roundedBaseValue} => {finalValueString} {statModificationName} ({stat.Value}%)\n";
-                    else
-                        output += $"{roundedBaseValue} => {finalValueString} {statModificationName}\n";
-                }
-                else
-                {
-                    finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
+                            if (stat.Type == Enchantment.StatModification.BonusType.Modifier)
+                                output += $"{roundedBaseValue} => {finalValueString} {statModificationName} ({stat.Value}%)\n";
+                            else
+                                output += $"{roundedBaseValue} => {finalValueString} {statModificationName}\n";
+                            break;
+                        }
+                    case Enchantment.Stat.FoodDepletionRate:
+                    case Enchantment.Stat.DrinkDepletionRate:
+                    case Enchantment.Stat.SleepDepletionRate:
+                        {
+                            output += $"{stat.Value * -1}% {statModificationName}\n";
+                            break;
+                        }
+                    case Enchantment.Stat.HealthRegen:
+                    case Enchantment.Stat.ManaRegen:
+                        {
+                            finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
 
-                    output += $"{roundedBaseValue}{additionalText} => {finalValueString} {statModificationName}\n";
+                            output += $"{baseValue}{additionalText} => {finalValueString} passive {statModificationName} per second\n";
+                            break;
+                        }
+                    default:
+                        {
+                            finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
+
+                            output += $"{roundedBaseValue}{additionalText} => {finalValueString} {statModificationName}\n";
+                            break;
+                        }
                 }
             }
 
@@ -110,6 +132,10 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                         else
                             return (totalValue + stat.Value).ToString();
                     }
+                case Enchantment.Stat.FoodDepletionRate:
+                case Enchantment.Stat.DrinkDepletionRate:
+                case Enchantment.Stat.SleepDepletionRate:
+                case Enchantment.Stat.StabilityRegen:
                 case Enchantment.Stat.Impact:
                     {
                         if (stat.Type == Enchantment.StatModification.BonusType.Modifier)
@@ -222,7 +248,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             foreach(DamageType type in enchantment.DamageBonus.List)
             {
-                baseDamage = weapon.GetDamageOfType(type.Type);
+                baseDamage = ItemEnchantmentInformationHelper.GetDamageOfType(type.Type, weapon);
 
                 roundedTotal = (int)Math.Round(baseDamage + type.Damage, MidpointRounding.AwayFromZero);
 
@@ -230,6 +256,16 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             }
 
             return output;
+        }
+
+        public static float GetDamageOfType(DamageType.Types _type, Weapon weapon)
+        {
+            DamageType damageType = weapon.GetDamage(0, false)[_type];
+            if (damageType == null)
+            {
+                return 0f;
+            }
+            return damageType.Damage;
         }
 
         public static float GetWeaponEnchantmentDamageBonus(Weapon weapon, DamageType damageType)
@@ -378,7 +414,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 baseDamage = weapon.Stats.GetDamageAttack(type.Type);
                 roundedResult = (int)Math.Round(baseDamage + type.Damage, MidpointRounding.AwayFromZero);
 
-                output += $"{baseDamage} => {roundedResult} {type.Type}\n";
+                output += $"{baseDamage}% => {roundedResult}% {type.Type} Damage Bonus\n";
             }
 
             return output;
