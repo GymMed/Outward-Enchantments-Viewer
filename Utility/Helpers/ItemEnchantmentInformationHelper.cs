@@ -97,6 +97,13 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                             output += $"{baseValue}{additionalText} => {finalValueString} passive {statModificationName} per second\n";
                             break;
                         }
+                    case Enchantment.Stat.AttackSpeed:
+                        {
+                            finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
+
+                            output += $"{baseValue}{additionalText} => {finalValueString} {statModificationName}\n";
+                            break;
+                        }
                     default:
                         {
                             finalValueString = GetFinalCalcualtedStatValue(equipment, stat);
@@ -281,6 +288,34 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             return 0.0f;
         }
 
+        public static string GetDamageListDescription(Enchantment enchantment, Equipment equipment)
+        {
+            string output = "";
+
+            if (enchantment.DamageBonus == null || enchantment.DamageBonus.Count < 1)
+                return output;
+            
+            #if DEBUG
+            output += $"Damage Bonus {enchantment.DamageBonus.Count}\n";
+            #endif
+
+            float physicalDamage = equipment.Stats.GetDamageAttack(DamageType.Types.Physical);
+
+            float baseDamage = 0.0f;
+            int roundedTotal = 0;
+
+            foreach(DamageType type in enchantment.DamageBonus.List)
+            {
+                baseDamage = equipment.GetDamageAttack(type.Type);
+                roundedTotal = (int)Math.Round(baseDamage + type.Damage, MidpointRounding.AwayFromZero);
+
+                output += $"{(int)Math.Round(baseDamage, MidpointRounding.AwayFromZero)}% => {roundedTotal}% from {physicalDamage} {type.Type}\n";
+            }
+
+            return output;
+        }
+
+
         public static string GetDamageListDescription(Enchantment enchantment, Armor armor)
         {
             string output = "";
@@ -379,6 +414,15 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                     methodsOutput += GetElementalResistancesDescription(enchantment, armor);
                     methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
                 }
+                else if(equipment is Bag bag)
+                {
+                    methodsOutput += GetDamageListDescription(enchantment, bag);
+                    methodsOutput += GetDamageModifiersDescription(enchantment, bag);
+                    methodsOutput += GetEffectsDescription(enchantment);
+                    methodsOutput += GetStatsModifcationDescriptions(equipment, enchantment.StatModifications);
+                    methodsOutput += GetElementalResistancesDescription(enchantment, bag);
+                    methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
+                }
 
                 if (methodsOutput != "")
                 {
@@ -394,7 +438,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             }
         }
         
-        public static string GetDamageModifiersDescription(Enchantment enchantment, Weapon weapon)
+        public static string GetDamageModifiersDescription(Enchantment enchantment, Equipment equipment)
         {
             string output = "";
 
@@ -411,96 +455,10 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             foreach (DamageType type in enchantment.DamageModifier.List)
             {
-                baseDamage = weapon.Stats.GetDamageAttack(type.Type);
+                baseDamage = equipment.Stats.GetDamageAttack(type.Type);
                 roundedResult = (int)Math.Round(baseDamage + type.Damage, MidpointRounding.AwayFromZero);
 
                 output += $"{baseDamage}% => {roundedResult}% {type.Type} Damage Bonus\n";
-            }
-
-            return output;
-        }
-
-        public static string GetDamageModifiersDescription(Enchantment enchantment, Armor armor)
-        {
-            string output = "";
-
-            if (enchantment.DamageModifier == null || enchantment.DamageModifier.Count < 1)
-                return output;
-            
-            #if DEBUG
-            output += $"Damage Modifiers \n";
-            #endif
-            DamageList changesInDamages = new DamageList();
-            float physicalDamage = armor.Stats.GetDamageAttack(DamageType.Types.Physical);
-
-            float baseDamage = 0.0f;
-            int roundedResult = 0;
-
-            foreach (DamageType type in enchantment.DamageModifier.List)
-            {
-                baseDamage = armor.Stats.GetDamageAttack(type.Type);
-                roundedResult = (int)Math.Round(baseDamage + type.Damage, MidpointRounding.AwayFromZero);
-
-                output += $"{baseDamage}% => {roundedResult}% {type.Type} Damage Bonus\n";
-            }
-
-            return output;
-        }
-
-        public static string GetDamageModifiersDescription(Enchantment enchantment, DamageList equipmentDamageList)
-        {
-            string output = "";
-
-            if (enchantment.DamageModifier == null || enchantment.DamageModifier.Count < 1)
-                return output;
-            
-            #if DEBUG
-            output += $"Damage Modifiers \n";
-            #endif
-            DamageList changesInDamages = new DamageList();
-            DamageType physicalDamage = GetMatchingDamageType(equipmentDamageList.List, DamageType.Types.Physical);
-
-            changesInDamages = CalculateChangesInItemDamageList(equipmentDamageList, enchantment.DamageModifier);
-            List<DamageType> equipmentDamages = equipmentDamageList.List;
-            float converstionRate = 0.0f;
-            string finalConverstion = "";
-            bool foundMatch = false;
-
-            foreach (DamageType type in changesInDamages.List)
-            {
-                string testDamages = "";
-
-                foreach (DamageType baseType in equipmentDamages)
-                {
-                    testDamages += baseType.ToString() + " ";
-                    if (baseType.Type == type.Type)
-                    {
-                        foundMatch = true;
-                        converstionRate = baseType.Damage * (type.Damage / 100);
-
-                        if (converstionRate == 0)
-                        {
-                            converstionRate = type.Damage;
-                            finalConverstion = converstionRate.ToString() + "%";
-                        }
-                        else
-                        {
-                            finalConverstion = converstionRate.ToString();
-                        }
-
-                        output += $"{baseType.Damage}% => {finalConverstion} {TryGetFromDamageText(physicalDamage, type)}";
-                        break;
-                    }
-                }
-
-                if(foundMatch)
-                {
-                    foundMatch = false;
-                }
-                else
-                {
-                    output += $"0% => {type.Damage}% {TryGetFromDamageText(physicalDamage, type)} {testDamages}";
-                }
             }
 
             return output;
@@ -631,6 +589,56 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 {
                     output += $"0% => {type.Damage}% {type.Type} resistance\n";
                 }
+            }
+
+            return output;
+        }
+
+        public static string GetEffectsDescription(Enchantment enchantment)
+        {
+            string output = "";
+
+            if (enchantment.Effects.Count() < 1)
+                return output;
+
+            #if DEBUG
+            output += $"Effects \n";
+            #endif
+
+            GenericHelper.SplitDerivedClasses(
+                enchantment.Effects, 
+                out Effect[] remainingEffects, 
+                out AddStatusEffectBuildUp[] derivedStatusEffects
+            );
+
+            output += GetAddStatusEffectBuildUpDescription(derivedStatusEffects);
+
+
+            GenericHelper.SplitDerivedClasses(
+                remainingEffects, 
+                out remainingEffects, 
+                out AffectStatusEffectBuildUpResistance[] derivedStatusResistances
+            );
+
+            output += GetAffectStatusEffectBuildUpResistancesDescription(derivedStatusResistances);
+
+            GenericHelper.SplitDerivedClasses(
+                remainingEffects, 
+                out remainingEffects, 
+                out AddStatusEffect[] derivedAddStatusEffect
+            );
+
+            output += GetAddStatusEffectsDescription(derivedAddStatusEffect);
+
+            foreach (Effect effect in remainingEffects)
+            {
+                //left for people to report
+                output += $"Type: {effect.GetType()}";
+            }
+
+            if (!output.EndsWith("\n"))
+            {
+                output += "\n";
             }
 
             return output;

@@ -23,6 +23,13 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 {
                     return WeaponTypeExtensions.GetWeaponTypeName(weapon.Type);
                 }
+                else
+                {
+                    if (data.SpecificIngredient == null)
+                        return "";
+
+                    return data.SpecificIngredient.Name;
+                }
             }
 
             return "";

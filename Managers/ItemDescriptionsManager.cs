@@ -16,6 +16,18 @@ namespace OutwardEnchantmentsViewer.Managers
 {
     public class ItemDescriptionsManager
     {
+        public struct EnchantmentInformationData
+        {
+            public string DynamicDescription { get; set; }
+            public string EquipmentType { get; set; }
+
+            public EnchantmentInformationData(string dynamicDescription, string equipmentType)
+            {
+                DynamicDescription = dynamicDescription;
+                EquipmentType = equipmentType;
+            }
+        }
+        
         private static ItemDescriptionsManager _instance;
 
         private ItemDescriptionsManager()
@@ -116,10 +128,12 @@ namespace OutwardEnchantmentsViewer.Managers
             {
                 //List<Item> inventoryItems = GetUniqueItemsInInventory(inventory);
                 string output = "\n";
+                Enchantment enchantment = null;
+                List<EnchantmentInformationData> enchantmentInformations = new List<EnchantmentInformationData>();
 
-                foreach (EnchantmentRecipe recipe in item.Recipes)
+                foreach (EnchantmentRecipe currentRecipe in item.Recipes)
                 {
-                    Enchantment enchantment = ResourcesPrefabManager.Instance.GetEnchantmentPrefab(recipe.RecipeID);
+                    enchantment = ResourcesPrefabManager.Instance.GetEnchantmentPrefab(currentRecipe.RecipeID);
 
                     if (enchantment == null)
                     {
@@ -129,9 +143,26 @@ namespace OutwardEnchantmentsViewer.Managers
                         return;
                     }
 #if DEBUG
-                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@SetEnchantmentsDescription got enchantment {enchantment?.Name} RecipeID {recipe.RecipeID} ResultID {recipe.ResultID}");
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@SetEnchantmentsDescription got enchantment {enchantment?.Name} RecipeID {currentRecipe.RecipeID} ResultID {currentRecipe.ResultID}");
 #endif
-                    output += GetEnchantmentInformation(enchantment, recipe);
+                    EnchantmentInformationData enchantmentData = GetEnchantmentInformation(enchantment, currentRecipe);
+                    enchantmentInformations.Add(enchantmentData);
+
+                    //output += $"{enchantmentData.EquipmentType}{enchantmentData.DynamicDescription}\n";
+                }
+
+                List<string> equipments = GetEquipmentTypesFromEnchantmentItem(item);
+
+                for(int currentRecipe = 0; currentRecipe < item.Recipes.Length; currentRecipe++)
+                {
+                    if (string.IsNullOrEmpty(enchantmentInformations[currentRecipe].EquipmentType))
+                    {
+                        output += $"{equipments[currentRecipe]}?\n{enchantmentInformations[currentRecipe].DynamicDescription}\n";
+                    }
+                    else
+                    {
+                        output += $"{enchantmentInformations[currentRecipe].EquipmentType}{enchantmentInformations[currentRecipe].DynamicDescription}\n";
+                    }
                 }
 
                 ItemDisplayManager.Instance.SetHeaderText(
@@ -147,6 +178,101 @@ namespace OutwardEnchantmentsViewer.Managers
             {
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@SetEnchantmentsDescription error: {e.Message}");
             }
+        }
+
+        public List<string> GetEquipmentTypesFromEnchantmentItem(EnchantmentRecipeItem enchantmentItem)
+        {
+            string[] fullItemsNames = ItemDescriptionsManager.GetEquipmentsFromEnchantmentItem(enchantmentItem);
+            List<string> finalNames = new List<string>();
+            string[] parts = new string[0];
+            string receivedEquipmentType = "";
+
+            foreach(string itemName in fullItemsNames)
+            {
+                parts = itemName.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+#if DEBUG
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@GetEquipmentTypesFromEnchantmentItem description itemName: {itemName}");
+                    string combinedParts = "";
+                    foreach(string part in parts)
+                    {
+                        combinedParts += "[" + part + "]";
+                    }
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@GetEquipmentTypesFromEnchantmentItem description parts: {combinedParts}");
+#endif
+
+                if(parts.Length > 1)
+                {
+                    receivedEquipmentType = getEquipmentTypeString(parts[parts.Length - 1]);
+                    if (string.IsNullOrEmpty(receivedEquipmentType))
+                    {
+                        finalNames.Add(itemName);
+                        continue;
+                    }
+                    //provides full item name instead of type
+                    finalNames.Add(receivedEquipmentType);
+                    continue;
+                }
+
+                receivedEquipmentType = getEquipmentTypeString(itemName);
+                if (string.IsNullOrEmpty(receivedEquipmentType))
+                {
+                    finalNames.Add(itemName);
+                    continue;
+                }
+                //provides full item name instead of type
+                finalNames.Add(receivedEquipmentType);
+                continue;
+            }
+
+            return finalNames;
+        }
+
+        public static string getEquipmentTypeString(string equipmentType)
+        {
+            switch(equipmentType.ToLower())
+            {
+                case "helm":
+                case "helmet":
+                    {
+                        return "Helmet";
+                    }
+                case "armor":
+                case "chest":
+                    {
+                        return "Chest";
+                    }
+                case "boots":
+                    {
+                        return "Boots";
+                    }
+                case "weapon":
+                    {
+                        return "Weapon";
+                    }
+                default:
+                    {
+                        return "";
+                    }
+            }
+        }
+
+        public static string[] GetEquipmentsFromEnchantmentItem(EnchantmentRecipeItem enchantmentItem)
+        {
+            var matches = Regex.Matches(enchantmentItem.Description, @"Equipment:\s*(.*)");
+
+            if (matches.Count > 0)
+            {
+                // Use Group[1] → only the part after "Equipment:"
+                return matches[0]
+                    .Groups[1]
+                    .Value
+                    .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => s.Trim())   // remove leading/trailing spaces
+                    .ToArray();
+            }
+
+            return Array.Empty<string>();
         }
 
         public string GetEnchantmentRecipeEquipmentName(EnchantmentRecipe recipe)
@@ -166,18 +292,12 @@ namespace OutwardEnchantmentsViewer.Managers
             return output;
         }
 
-        public string GetDynamicEnchantmentInformationSection(Enchantment enchantment, EnchantmentRecipe recipe)
+        public EnchantmentInformationData GetDynamicEnchantmentInformationSection(Enchantment enchantment, EnchantmentRecipe recipe)
         {
-            string output = "";
-
-            output += GetEnchantmentRecipeEquipmentName(recipe);
-            output += GetDynamicEnchantmentInformation(enchantment);
-
-            return output;
-
+            return new EnchantmentInformationData(GetDynamicEnchantmentInformation(enchantment), GetEnchantmentRecipeEquipmentName(recipe));
         }
 
-        public string GetEnchantmentInformation(Enchantment enchantment, EnchantmentRecipe recipe)
+        public EnchantmentInformationData GetEnchantmentInformation(Enchantment enchantment, EnchantmentRecipe recipe)
         {
             try
             {
@@ -195,19 +315,22 @@ namespace OutwardEnchantmentsViewer.Managers
                 #endif
 
                 if (enchantmentDescription.overwrite)
-                    return enchantmentDescription.description;
+                    return new EnchantmentInformationData(enchantmentDescription.description, "");
 
-                string output = "";
+                EnchantmentInformationData dynamicEnchantmentData = GetDynamicEnchantmentInformationSection(enchantment, recipe);
+                string fixedDescription = "";
 
-                output += GetDynamicEnchantmentInformationSection(enchantment, recipe);
-                output += enchantmentDescription.description;
+                if (enchantmentDescription.description.StartsWith("\n"))
+                    fixedDescription = enchantmentDescription.description.TrimStart('\n');
+                else
+                    fixedDescription = enchantmentDescription.description;
 
-                return output;
+                return new EnchantmentInformationData(fixedDescription + dynamicEnchantmentData.DynamicDescription, dynamicEnchantmentData.EquipmentType);
             }
             catch (Exception ex) 
             {
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@GetEnchantmentInformation error: {ex.Message}");
-                return "Error";
+                return new EnchantmentInformationData("Error", "");
             }
         }
 
@@ -224,14 +347,14 @@ namespace OutwardEnchantmentsViewer.Managers
 
             if (enchantment.GlobalStatusResistance > 0.0f)
             {
-                output += $"Global Status Resistance {enchantment.GlobalStatusResistance.ToString()} \n\n";
+                output += $"Global Status Resistance {enchantment.GlobalStatusResistance.ToString()} \n";
             }
 
             if (enchantment.HealthAbsorbRatio > 0.0f)
             {
                 //output += $"Health Absorb Ratio {enchantment.HealthAbsorbRatio.ToString()} \n";
                 output += $"Gain +{enchantment.HealthAbsorbRatio.ToString()}x Health Leech (damage " +
-                    $"dealth will restore {enchantment.HealthAbsorbRatio.ToString()}x the damage as Health) \n\n";
+                    $"dealth will restore {enchantment.HealthAbsorbRatio.ToString()}x the damage as Health) \n";
             }
 
             if (enchantment.Indestructible)
@@ -243,31 +366,31 @@ namespace OutwardEnchantmentsViewer.Managers
             {
                 //output += $"Mana Absorb Ratio {enchantment.ManaAbsorbRatio.ToString()} \n";
                 output += $"Gain +{enchantment.ManaAbsorbRatio.ToString()}x Mana Leech (damage " +
-                    $"dealth will restore {enchantment.ManaAbsorbRatio.ToString()}x the damage as Mana) \n\n";
+                    $"dealth will restore {enchantment.ManaAbsorbRatio.ToString()}x the damage as Mana) \n";
             }
 
             if (enchantment.StaminaAbsorbRatio > 0.0f)
             {
                 //output += $"Stamina Absorb Ratio {enchantment.StaminaAbsorbRatio.ToString()} \n";
                 output += $"Gain +{enchantment.StaminaAbsorbRatio.ToString()}x Stamina Leech (damage " +
-                    $"dealth will restore {enchantment.StaminaAbsorbRatio.ToString()}x the damage as Stamina) \n\n";
+                    $"dealth will restore {enchantment.StaminaAbsorbRatio.ToString()}x the damage as Stamina) \n";
             }
 
             if (enchantment.TrackDamageRatio > 0.0f)
             {
-                output += $"Track Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n\n";
+                output += $"Track Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n";
             }
 
             if (!string.IsNullOrWhiteSpace(enchantment.Description))
             {
-                output += $"{enchantment.Description} \n\n";
+                output += $"{enchantment.Description} \n";
             }
 
             output += CustomEnchantmentsDescriptionsExtensions.GetDescription(enchantment.PresetID);
 
             if(output == "")
             {
-                return "Doesn't give stats in traditional way and uses unknown properties";
+                return "Doesn't give stats in traditional way and uses unknown properties \n";
             }
 
             return output;

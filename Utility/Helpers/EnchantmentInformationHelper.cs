@@ -39,7 +39,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 output += " and " + GetDamageDescription(damageBonus);
             }
 
-            output += "\n\n";
+            output += "\n";
 
             return output;
         }
@@ -92,7 +92,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 damageModifier = enchantment.DamageModifier[totalDamageModifiersMinusOne];
                 output += " and " + GetModifierDescription(damageModifier);
             }
-            output += "\n\n";
+            output += "\n";
 
             return output;
         }
@@ -138,7 +138,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 string converstionRate = ((int)Math.Round((additionalDamage.ConversionRatio * 100), 0)).ToString();
 
                 output += $"{damageGrowthWord}{converstionRate}% of the existing weapon's {additionalDamage.SourceDamageType}" +
-                    $" damage as {additionalDamage.BonusDamageType} damage \n\n";
+                    $" damage as {additionalDamage.BonusDamageType} damage \n";
             }
 
             return output;
@@ -172,7 +172,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 statModification = enchantment.StatModifications[totalStatModificationsMinusOne];
                 output += " and " + GetStatModificationDescription(statModification);
             }
-            output += "\n\n";
+            output += "\n";
 
             return output;
         }
@@ -229,7 +229,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 output += " and " + GetElementalResistanceDescription(elementalResistance);
             }
 
-            output += "\n\n";
+            output += "\n";
 
             return output;
         }
@@ -283,7 +283,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             foreach (ShootEnchantmentBlast shootBlast in derivedShootBlasts)
             {
                 output += $"Weapon deals an AoE {shootBlast.BaseBlast?.GetComponentInChildren<WeaponDamage>()?.OverrideDType} \"Blast\" with " + 
-                    $"{shootBlast.DamageMultiplier}x damage multiplier (based on Weapon's total base damage) \n\n";
+                    $"{shootBlast.DamageMultiplier}x damage multiplier (based on Weapon's total base damage) \n";
             }
 
             GenericHelper.SplitDerivedClasses(
@@ -308,7 +308,11 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 output += $"Type: {effect.GetType()}";
             }
 
-            output += "\n";
+            if (!output.EndsWith("\n"))
+            {
+                output += "\n";
+            }
+
             return output;
         }
 
@@ -337,7 +341,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             {
                 currentStatus = derivedStatusEffects[derivedLengthMinusOne];
                 output += $" and {currentStatus.Status.StatusName} " +
-                    $"({currentStatus.BuildUpValue}% buildup) \n\n";
+                    $"({currentStatus.BuildUpValue}% buildup) \n";
             }
 
             return output;
@@ -354,21 +358,21 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             AffectStatusEffectBuildUpResistance currentStatusResistance = derivedStatusResistances[0];
 
             output += $"Euipment now provides {currentStatusResistance.StatusEffect.StatusName} " + 
-                $"({currentStatusResistance.RealValue}% buildup) resistance";
+                $"({currentStatusResistance.Value}% buildup) resistance";
 
             for(int currentResistancesEffect = 0; currentResistancesEffect < derivedResistancesLengthMinusOne; currentResistancesEffect++)
             {
                 currentStatusResistance = derivedStatusResistances[currentResistancesEffect];
 
                 output += $", {currentStatusResistance.StatusEffect.StatusName} " + 
-                    $"({currentStatusResistance.RealValue}% buildup) resistance";
+                    $"({currentStatusResistance.Value}% buildup) resistance";
             }
 
             if (derivedResistancesLengthMinusOne > 0)
             {
                 currentStatusResistance = derivedStatusResistances[derivedResistancesLengthMinusOne];
                 output += $" and {currentStatusResistance.StatusEffect.StatusName} " +
-                    $"({currentStatusResistance.RealValue}% buildup) resistance \n";
+                    $"({currentStatusResistance.Value}% buildup) resistance \n";
             }
 
             return output;
