@@ -152,12 +152,33 @@ namespace OutwardEnchantmentsViewer.Managers
                 }
 
                 List<string> equipments = GetEquipmentTypesFromEnchantmentItem(item);
+                string equipmentName = "";
+                int enchantmentInformationsCountMinusOne = enchantmentInformations.Count - 1;
 
                 for(int currentRecipe = 0; currentRecipe < item.Recipes.Length; currentRecipe++)
                 {
+                    if(currentRecipe > enchantmentInformationsCountMinusOne)
+                    {
+                        output += "Error: could not retrieve that many enchantment informations as there are recipes!";
+                        continue;
+                    }
+
                     if (string.IsNullOrEmpty(enchantmentInformations[currentRecipe].EquipmentType))
                     {
-                        output += $"{equipments[currentRecipe]}?\n{enchantmentInformations[currentRecipe].DynamicDescription}\n";
+                        if (currentRecipe < equipments.Count)
+                        {
+                            equipmentName = equipments[currentRecipe];
+                            output += $"{equipmentName}?\n{enchantmentInformations[currentRecipe].DynamicDescription}\n";
+                        }
+                        else
+                        {
+                            equipmentName = "Undetermined Equipment";
+                            output += $"{equipmentName}\n{enchantmentInformations[currentRecipe].DynamicDescription}\n";
+#if DEBUG
+                            SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@SetEnchantmentsDescription Unknown Equipment recipes:{item.Recipes.Length}" +
+                            "-" + string.Join("|", equipments));
+#endif
+                        }
                     }
                     else
                     {
@@ -209,7 +230,6 @@ namespace OutwardEnchantmentsViewer.Managers
                         finalNames.Add(itemName);
                         continue;
                     }
-                    //provides full item name instead of type
                     finalNames.Add(receivedEquipmentType);
                     continue;
                 }
@@ -249,6 +269,10 @@ namespace OutwardEnchantmentsViewer.Managers
                 case "weapon":
                     {
                         return "Weapon";
+                    }
+                case "backpack":
+                    {
+                        return "Backpack";
                     }
                 default:
                     {

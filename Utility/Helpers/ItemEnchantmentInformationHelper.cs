@@ -267,12 +267,103 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
         public static float GetDamageOfType(DamageType.Types _type, Weapon weapon)
         {
-            DamageType damageType = weapon.GetDamage(0, false)[_type];
+            DamageType damageType = null;
+
+            if(weapon.m_weaponStats != null || weapon.OwnerCharacter != null)
+                damageType = weapon.GetDamage(0, false)[_type];
+            else
+                damageType = GetDamageFromWeapon(weapon)[_type];
+
             if (damageType == null)
             {
                 return 0f;
             }
             return damageType.Damage;
+        }
+
+        //safer logic for Weapon.GetDamage() method
+        public static DamageList GetDamageFromWeapon(Weapon weapon)
+        {
+            DamageList.EmptyCopy(weapon.Damage, ref weapon.baseDamage);
+            WeaponBaseData data = null;
+
+            if(weapon.m_weaponStats == null)
+            {
+                data = Global.Instance.WeaponBaseStats.WeaponStatsDict[(int)weapon.Type];
+            }
+
+            for (int i = 0; i < weapon.baseDamage.Count; i++)
+            {
+                if (weapon.Stats)
+                {
+                    IList<float> attackDamage = weapon.Stats.GetAttackDamage(0);
+                    if (i < attackDamage.Count)
+                    {
+                        weapon.baseDamage[i].Damage = attackDamage[i];
+                        int index;
+                        if (weapon.IsDamageAddedByEnchantment(weapon.baseDamage[i].Type, out index))
+                        {
+                            weapon.baseDamage[i].Damage += weapon.m_enchantmentDamageBonus[index].Damage;
+                        }
+                    }
+                    else
+                    {
+                        weapon.baseDamage[i].Damage = weapon.Damage[i].Damage;
+                    }
+                }
+                else
+                {
+                    if (weapon.m_weaponStats != null)
+                        weapon.baseDamage[i].Damage = weapon.m_weaponStats.GetDamage(0);
+                    else
+                    {
+                        weapon.baseDamage[i].Damage = data.GetDamage(0);
+                    }
+                }
+                if (weapon.baseDamage[i].Damage == -1f)
+                {
+
+                    if (weapon.m_weaponStats == null)
+                    {
+                        ItemEnchantmentInformationHelper.fixWeaponBaseDamages(weapon, data, i);
+                    }
+                    else
+                    {
+                        ItemEnchantmentInformationHelper.fixWeaponBaseDamages(weapon, weapon.m_weaponStats, i);
+                    }
+                }
+            }
+            if (weapon.Stats)
+            {
+                weapon.baseDamage *= weapon.Stats.Effectiveness;
+            }
+
+            return weapon.baseDamage;
+        }
+
+        public static void fixWeaponBaseDamages(Weapon weapon, WeaponBaseData weaponStats, int type)
+        {
+            float damage = weapon.m_baseDamage[type].Damage;
+            if (weaponStats.Damage > 0f)
+            {
+                float damage2 = weaponStats.GetDamage(0);
+                if (damage2 != -1f)
+                {
+                    weapon.baseDamage[type].Damage = damage * (damage2 / weaponStats.Damage);
+                }
+                else if (weapon.Damage[type].Damage != -1f)
+                {
+                    weapon.baseDamage[type].Damage = damage;
+                }
+                else
+                {
+                    weapon.baseDamage[type].Damage = weaponStats.Damage;
+                }
+            }
+            else
+            {
+                weapon.baseDamage[type].Damage = damage;
+            }
         }
 
         public static float GetWeaponEnchantmentDamageBonus(Weapon weapon, DamageType damageType)
@@ -386,7 +477,6 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
         {
             try
             {
-                string output = "";
                 string methodsOutput = "";
 
                 if (equipment is Weapon weapon)
@@ -402,17 +492,29 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 }
                 else if (equipment is Armor armor)
                 {
-                    DamageType[] damageResistances = armor.m_baseData.DamageReduction.ToArray();//equipment.Stats.m_damageResistance.ToArray();// armor.m_baseData.DamageReduction.ToArray();
+                    ArmorBaseData baseData = armor.m_baseData;
+
+                    if(armor.m_baseData == null)
+                    {
+                        baseData = Global.Instance.WeaponBaseStats.GetArmorData(armor.EquipSlot, armor.Class);
+            #if DEBUG
+                        SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@BuildDescriptions armor.m_baseData is null!");
+            #endif
+                    }
+
+                    if(baseData.DamageReduction == null)
+                    {
+                        return BuildDefaultDescriptions(enchantment, equipment);
+            #if DEBUG
+                        SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@BuildDescriptions armorBaseData.DamageReduction is null!");
+            #endif
+                    }
+
+                    DamageType[] damageResistances = baseData.DamageReduction.ToArray();//equipment.Stats.m_damageResistance.ToArray();// armor.m_baseData.DamageReduction.ToArray();
                     //armor.m_baseData.DamageResistance
                     DamageList damageReductions = new DamageList(damageResistances);
                     //DamageList armorStats = armor.Stats.BaseDamage;
-                    methodsOutput += GetDamageListDescription(enchantment, armor);
-                    methodsOutput += GetDamageModifiersDescription(enchantment, armor);
-                    methodsOutput += GetAdditionalDamagesDescription(enchantment, damageReductions);
-                    methodsOutput += GetEffectsDescription(enchantment, damageReductions);
-                    methodsOutput += GetStatsModifcationDescriptions(equipment, enchantment.StatModifications);
-                    methodsOutput += GetElementalResistancesDescription(enchantment, armor);
-                    methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
+                    methodsOutput += BuildArmorDescriptions(enchantment, armor, damageReductions);
                 }
                 else if(equipment is Bag bag)
                 {
@@ -424,16 +526,48 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                     methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
                 }
 
-                if (methodsOutput != "")
-                {
-                    output += $"{methodsOutput}";
-                }
-
-                return output;
+                return methodsOutput;
             }
             catch(Exception ex)
             {
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@BuildDescriptions error: {ex.Message}");
+                return "Error";
+            }
+        }
+
+        public static string BuildArmorDescriptions(Enchantment enchantment, Armor armor, DamageList damageReductions)
+        {
+            string methodsOutput = "";
+
+            methodsOutput += GetDamageListDescription(enchantment, armor);
+            methodsOutput += GetDamageModifiersDescription(enchantment, armor);
+            methodsOutput += GetAdditionalDamagesDescription(enchantment, damageReductions);
+            methodsOutput += GetEffectsDescription(enchantment, damageReductions);
+            methodsOutput += GetStatsModifcationDescriptions(armor, enchantment.StatModifications);
+            methodsOutput += GetElementalResistancesDescription(enchantment, armor);
+            methodsOutput += GetAdditionalDescriptions(armor, enchantment, methodsOutput);
+
+            return methodsOutput;
+        }
+
+        public static string BuildDefaultDescriptions(Enchantment enchantment, Equipment equipment)
+        {
+            try
+            {
+                string methodsOutput = "";
+
+                methodsOutput += GetDamageListDescription(enchantment, equipment);
+                methodsOutput += GetDamageModifiersDescription(enchantment, equipment);
+                methodsOutput += GetEffectsDescription(enchantment);
+                methodsOutput += GetStatsModifcationDescriptions(equipment, enchantment.StatModifications);
+                methodsOutput += GetElementalResistancesDescription(enchantment, equipment);
+                methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
+
+                return methodsOutput;
+            }
+            catch(Exception ex)
+            {
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDescriptionsManager@BuildDefaultDescriptions error: {ex.Message}");
                 return "Error";
             }
         }
@@ -504,12 +638,21 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 float convertedDamage = sourceDamage * (converstion / 100.0f);
                 float totalDamage = bonusDamage + convertedDamage;
                 int roundedTotal = (int)Math.Round(totalDamage, MidpointRounding.AwayFromZero);
+                int roundedBonusDamage = (int)Math.Round(bonusDamage, MidpointRounding.AwayFromZero);
+
+                if(roundedBonusDamage == roundedTotal)
+                {
+                    #if DEBUG
+                    output += $"Rounded Bonus Damage matched Rounded Total = no changes \n";
+                    #endif
+                    continue;
+                }
 
                 //output += $"Source damage is found {sourceDamage} conv {converstion} and {convertDamage}\n";
 
                 //output += $"Adds {converstionRate}% {convertDamage} of the existing weapon's {additionalDamage.SourceDamageType}" +
                 //    $" damage as {additionalDamage.BonusDamageType} damage \n\n";
-                output += $"{(int)Math.Round(bonusDamage, MidpointRounding.AwayFromZero)} => {roundedTotal} ({converstion}% of {(int)Math.Round(sourceDamage, MidpointRounding.AwayFromZero)} {additionalDamage.SourceDamageType}) {additionalDamage.BonusDamageType} Damage\n";
+                output += $"{roundedBonusDamage} => {roundedTotal} ({converstion}% of {(int)Math.Round(sourceDamage, MidpointRounding.AwayFromZero)} {additionalDamage.SourceDamageType}) {additionalDamage.BonusDamageType} Damage\n";
             }
 
             return output;
