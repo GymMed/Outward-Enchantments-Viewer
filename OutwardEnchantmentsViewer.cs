@@ -76,14 +76,14 @@ namespace OutwardEnchantmentsViewer
                 "Equipment Descriptions",
                 "ShowEquipmentOwnedEnchantmentsDetailed",
                 true,
-                "Show owned equipment enchantments in greater detail."
+                "Show owned equipment enchantments in greater detail?"
             );
 
             ShowEquipmentUnownedEnchantmentsDetailed = Config.Bind(
                 "Equipment Descriptions",
                 "ShowEquipmentUnownedEnchantmentsDetailed",
                 true,
-                "Show unowned equipment enchantments in greater detail."
+                "Show unowned equipment enchantments in greater detail?"
             );
 
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
