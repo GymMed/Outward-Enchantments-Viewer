@@ -26,7 +26,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.4.1";
+        public const string VERSION = "0.5.0";
 
         public static string prefix = "[gymmed-Enchantments-Viewer]";
 
@@ -49,6 +49,7 @@ namespace OutwardEnchantmentsViewer
         public static ConfigEntry<bool> ShowDescriptionsOnlyForInventory;
         public static ConfigEntry<bool> ShowEquipmentOwnedEnchantmentsDetailed;
         public static ConfigEntry<bool> ShowEquipmentUnownedEnchantmentsDetailed;
+        public static ConfigEntry<bool> ShowInShopEnchantmentWithEquipmentType;
 
         // Awake is called when your plugin is created. Use this to set up your mod.
         internal void Awake()
@@ -84,6 +85,13 @@ namespace OutwardEnchantmentsViewer
                 "ShowEquipmentUnownedEnchantmentsDetailed",
                 true,
                 "Show unowned equipment enchantments in greater detail?"
+            );
+
+            ShowInShopEnchantmentWithEquipmentType = Config.Bind(
+                "Enchantments Descriptions",
+                "ShowEnchantmentEquipmentTypeInShop",
+                true,
+                "Show in shop enchantment with equipment type?"
             );
 
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
@@ -269,7 +277,7 @@ namespace OutwardEnchantmentsViewer
                     {
                         case Equipment equipment:
                             {
-                                if (!ShowEquipmentDescriptions.Value || item.IsNonEnchantable)
+                                if (!ShowEquipmentDescriptions.Value || item.IsNonEnchantable) //|| equipment.EquipSlot == EquipmentSlot.EquipmentSlotIDs.Quiver)
                                 {
                                     ItemDisplayManager.Instance.HideDescription(__instance);
                                     ItemDisplayManager.Instance.HideDisabledDescription(__instance);

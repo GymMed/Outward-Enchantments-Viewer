@@ -18,6 +18,27 @@
 
 Outward mod that provides additional descriptions for items and enchantments.
 
+<details>
+    <summary>Enchantment Descriptions</summary>
+
+*Enchantments provide item type and enchantment descriptions*<br>
+![Picture](https://raw.githubusercontent.com/GymMed/Outward-Enchantments-Viewer/refs/heads/main/preview/images/3.png)
+</details>
+
+<details>
+    <summary>Item Descriptions</summary>
+
+*Enchantable items provide list of all compatible enchantments you have on your character and missing ones. Enchantments with a number in parentheses (e.g., (2)) show how many enchantments you currently have on your character.*<br>
+![Picture](https://raw.githubusercontent.com/GymMed/Outward-Enchantments-Viewer/refs/heads/main/preview/images/4.png)
+</details>
+
+<details>
+    <summary>Item Detailed Descriptions</summary>
+
+*Depending on your config settings your enchantable items can have calculations and effects on each enchantment description.*<br>
+![Calculations picture](https://raw.githubusercontent.com/GymMed/Outward-Enchantments-Viewer/refs/heads/main/preview/images/5.png)
+</details>
+
 ## Why use this mod?
 
 Do you find yourself constantly switching between **Outward** and the [Outward Wiki](https://outward.fandom.com/wiki/Outward_Wiki)? 
@@ -35,14 +56,28 @@ The **Outward Enchantments Viewer Mod** has you covered!
 6. **Adaptive Item Descriptions** – Item descriptions dynamically update by gathering information from other mods about available enchantments.  
 7. **Fixed Scroll View for Item Display Details** – Improves handling of longer modded descriptions by adjusting the scroll view, allowing for better readability and navigation. This enhances precision, provides more screen space, and ensures smooth scrolling, even when using a controller. 
 8. **[Custom Enchantment Descriptions](#how-to-create-personalized-enchantment-descriptions)** – Allows players to define their own enchantment descriptions through XML, which are then loaded into the game for a personalized experience.  
-9. **Configurable Display Settings** – Control how enchantment information is displayed through `BepInEx\config\gymmed.outwardenchantmentsviewer.cfg`. Customize the visibility of enchantment details using the following settings:  
+9. **[Configurable Display Settings](#configurable-display-settings)** – Control how enchantment information is displayed.
+
+## Calculations explanation
+
+<details>
+    <summary>base value => final value</summary>
+
+*Detailed equipment enchantment descriptions provide calculations. Base value shows current item stat value. Final value shows stat changes after enchanting it. Symbol `=>` symbolizes change/shift. You can change if you need this kind of information through config settings:`ShowDetailedOwnedEnchantments`, `ShowDetailedUnownedEnchantments`.*<br>
+![Calculations picture](https://raw.githubusercontent.com/GymMed/Outward-Enchantments-Viewer/refs/heads/main/preview/images/5.png)
+</details>
+
+## <a id="#configurable-display-settings"><a/>Configurable Display Settings
+
+Control how enchantment information is displayed through `BepInEx\config\gymmed.outwardenchantmentsviewer.cfg`. Customize the visibility of enchantment details using the following settings:
    - **ShowEnchantmentDescriptions** – Enable or disable detailed enchantment descriptions.  
    - **ShowEquipmentDescriptions** – Toggle the display of enchantments on equipment.  
    - **ShowAllAvailableEnchantmentsCountForEquipment** – Choose whether to show the total number of enchantments available for each piece of equipment.  
    - **ShowMissingEnchantmentsForEquipment** – Decide if missing enchantments for equipment should be displayed.  
    - **ShowDescriptionsOnlyForInventory** – Restrict enchantment descriptions to items currently in the player’s inventory, hiding details for items in shops.  
-   - **ShowDetailedOwnedEnchantments** – Enables detailed own enchantment descriptions for equipment.  
-   - **ShowDetailedUnownedEnchantments** – Enables detailed not own enchantment descriptions for equipment. 
+   - **ShowDetailedOwnedEnchantments** – Enables detailed own enchantments descriptions for equipment.  
+   - **ShowDetailedUnownedEnchantments** – Enables detailed not own enchantments descriptions for equipment. 
+   - **ShowInShopEnchantmentWithEquipmentType** – Enables enchantments in shop to show compatible equipment type. 
 
 ## How to use
 
@@ -51,7 +86,7 @@ The **Outward Enchantments Viewer Mod** has you covered!
 3. When you're ready, build the solution. It will be built to the `Release` folder (next to the `src` folder).
 4. Take the DLL from the `Release` folder and put it in the `BepInEx/plugins/` folder. If you use r2modman, this can be found by going into r2modman settings and clicking on `Browse Profile Folder`.
 
-## How to create personalized enchantment descriptions  
+## <a id="#how-to-create-personalized-enchantment-descriptions"><a/>How to create personalized enchantment descriptions
 
 To add custom enchantment descriptions, follow these steps:  
 
