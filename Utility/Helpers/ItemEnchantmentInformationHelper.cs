@@ -835,10 +835,9 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                     if (type.Type == DamageType.Types.Physical)
                     {
                         float converstionRate = type.Damage * (shootBlast.DamageMultiplier);
-                        int converstion = (int)Math.Round((shootBlast.DamageMultiplier * 100), 0);
 
                         output += $"Weapon deals an AoE {weaponDamage.OverrideDType} \"Blast\" with " +
-                            $"{converstion}x ({converstionRate}) damage multiplier (based on Weapon's total base damage {type.Damage}) \n";
+                            $"{shootBlast.DamageMultiplier}x ({converstionRate}) damage multiplier (based on Weapon's total base damage {type.Damage}) \n";
 
                         foundMatch = true;
                         break;
