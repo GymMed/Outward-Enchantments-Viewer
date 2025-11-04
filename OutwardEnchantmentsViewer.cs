@@ -27,7 +27,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "1.0.0";
+        public const string VERSION = "1.0.1";
 
         public const string EVENT_BUS_ALL_GUID = GUID + "_*";
 
