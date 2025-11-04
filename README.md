@@ -3,8 +3,8 @@
 </h1>
 <br/>
 <div align="center">
-  <img src="./preview/images/1.png" alt="Outward added item enchantments description."/>
-  <img src="./preview/images/3.png" alt="Outward added enchantment properties description."/>
+  <img src="https://raw.githubusercontent.com/GymMed/Outward-Enchantments-Viewer/refs/heads/main/preview/images/1.png" alt="Outward added item enchantments description."/>
+  <img src="https://raw.githubusercontent.com/GymMed/Outward-Enchantments-Viewer/refs/heads/main/preview/images/3.png" alt="Outward added enchantment properties description."/>
 </div>
 
 <div align="center">
@@ -13,6 +13,9 @@
 	</a>
 	<a href="https://github.com/GymMed/Outward-Enchantments-Viewer/releases/latest">
 		<img src="https://img.shields.io/thunderstore/v/GymMed/Enchantments_Viewer" alt="Thunderstore Version">
+	</a>
+	<a href="https://github.com/GymMed/Outward-Mods-Communicator/releases/latest">
+		<img src="https://img.shields.io/badge/Mods_Communicator-v1.2.0-99cc00" alt="Min Mods Communicator Version">
 	</a>
 </div>
 
@@ -55,7 +58,22 @@ The **Outward Enchantments Viewer Mod** has you covered!
 5. **Dynamic Enchantment Descriptions** – The system retrieves enchantment details from other mods, ensuring comprehensive and up-to-date descriptions.  
 6. **Adaptive Item Descriptions** – Item descriptions dynamically update by gathering information from other mods about available enchantments.  
 7. **Fixed Scroll View for Item Display Details** – Improves handling of longer modded descriptions by adjusting the scroll view, allowing for better readability and navigation. This enhances precision, provides more screen space, and ensures smooth scrolling, even when using a controller. 
-8. **[Custom Enchantment Descriptions](#how-to-create-personalized-enchantment-descriptions)** – Allows players to define their own enchantment descriptions through XML, which are then loaded into the game for a personalized experience.  
+8. **[Custom Enchantment Descriptions](#how-to-create-personalized-enchantment-descriptions)** – Allows players to define their own enchantment descriptions through XML, which are then loaded into the game for a personalized experience. 
+<details>
+    <summary>Modders can insert their xml file through <a href="https://thunderstore.io/c/outward/p/GymMed/Mods_Communicator/">ModsCommunicator</a>.</summary>
+Example:<br>
+<code>using OutwardModsCommunicator.EventBus;
+...
+public static void PublishEnchantmentDescriptions()
+{
+    var payload = new EventPayload
+    {
+        ["filePath"] = "filePath/fileName.xml",
+    };
+    EventBus.Publish("gymmed.outward_enchantments_viewer_*", "LoadCustomEnchantmentsDescriptionsXml", payload);
+}</code>
+</details>
+
 9. **[Configurable Display Settings](#configurable-display-settings)** – Control how enchantment information is displayed.
 
 ## Calculations explanation
@@ -90,7 +108,7 @@ Control how enchantment information is displayed through `BepInEx\config\gymmed.
 
 To add custom enchantment descriptions, follow these steps:  
 
-1. Copy the example file [`customEnchantmentsDescriptions.xml.example`](./customEnchantmentsDescriptions.xml.example) and rename it to `customEnchantmentsDescriptions.xml`.  
+1. Copy the example file [`BepInEx\config\gymmed.Mods_Communicator\Enchantments_Viewer\PlayersCustomEnchantmentsDescriptions.example.xml`](./PlayersCustomEnchantmentsDescriptions.example.xml) and rename it to `PlayersCustomEnchantmentsDescriptions.xml`.  
 2. Open the newly created file and add your custom enchantment descriptions by copying and modifying existing `<enchantment>` tags.  
 3. You can find the IDs for vanilla enchantments in [`vanillaRecipesID.txt`](./vanillaRecipesID.txt).  
 4. The `overwrite` attribute determines how your custom description interacts with existing ones:  

@@ -1,4 +1,5 @@
 ﻿using OutwardEnchantmentsViewer.Enchantments;
+using OutwardEnchantmentsViewer.Managers;
 using OutwardEnchantmentsViewer.Utility.Enums;
 using SideLoader;
 using System;
@@ -257,6 +258,74 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
             }
 
             return missingEnchantments;
+        }
+
+        public static bool IsEnchantmentInList(int enchantmentId, List<EnchantmentRecipeItem> enchantmentItems)
+        {
+            foreach(EnchantmentRecipeItem enchantmentItem in enchantmentItems)
+            {
+                foreach (EnchantmentRecipe enchantmentRecipe in enchantmentItem.Recipes)
+                {
+                    if (enchantmentRecipe.RecipeID == enchantmentId)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static List<EnchantmentRecipe> GetEnchantmentRecipesForEnchantment(Enchantment enchantment)
+        {
+            List<EnchantmentRecipe> enchantmentRecipes = new List<EnchantmentRecipe>();
+
+            foreach(EnchantmentRecipe enchantmentRecipe in RecipeManager.Instance.GetEnchantmentRecipes())
+            {
+                if (enchantmentRecipe.ResultID == enchantment.PresetID)
+                    enchantmentRecipes.Add(enchantmentRecipe);
+            }
+
+            return enchantmentRecipes;
+        }
+
+        public static string GetModifiedEnchantmentDescription(Enchantment enchantment)
+        {
+            string output = "";
+
+            EnchantmentDescription enchantmentDescription = CustomEnchantmentsManager.Instance.TryGetDescription(enchantment.PresetID);
+
+            if (enchantmentDescription == null)
+            {
+                if (!string.IsNullOrWhiteSpace(enchantment.Description))
+                {
+                    output += $"{enchantment.Description} \n";
+                }
+
+                //GenericHelper.AppendMessageWithSpace(ref output, CustomEnchantmentsDescriptionsExtensions.GetDescription(enchantment.PresetID));
+                //output.TrimEnd(' ');
+
+                if(!string.IsNullOrEmpty(output) && !output.EndsWith("\n"))
+                    output += "\n";
+
+                return output;
+            }
+
+            if(enchantmentDescription.overwrite)
+            {
+                output += $"{enchantmentDescription.description} \n";
+                return output;
+            }
+
+            output += enchantment.Description;
+
+            GenericHelper.AppendMessageWithSpace(ref output, enchantmentDescription.description);
+            //GenericHelper.AppendMessageWithSpace(ref output, CustomEnchantmentsDescriptionsExtensions.GetDescription(enchantment.PresetID));
+
+            if(!string.IsNullOrEmpty(output) && !output.EndsWith("\n"))
+                output += "\n";
+
+            return output;
         }
 
         // Fixes Game Developers Bug 

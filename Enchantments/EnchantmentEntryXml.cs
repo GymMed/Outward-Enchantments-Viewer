@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 namespace OutwardEnchantmentsViewer.Enchantments
 {
     [Serializable]
-    public class EnchantmentEntryJson
+    public class EnchantmentEntryXml
     {
         [XmlElement("id")]
         public int id { get; set; }

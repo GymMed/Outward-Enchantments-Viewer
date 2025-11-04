@@ -97,5 +97,13 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             return false;
         }
+
+        public static void AppendMessageWithSpace(ref string message, string appendingText)
+        {
+            if (!message.EndsWith(" ") && !message.EndsWith("\n") && !appendingText.EndsWith(" ") && !appendingText.EndsWith("\n"))
+                message += " ";
+            
+            message += appendingText;
+        }
     }
 }

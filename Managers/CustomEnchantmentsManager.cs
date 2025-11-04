@@ -19,6 +19,8 @@ namespace OutwardEnchantmentsViewer.Managers
 
         private CustomEnchantmentsManager()
         {
+            configPath = Path.Combine(OutwardModsCommunicator.Managers.PathsManager.ConfigPath, "Enchantments_Viewer");
+            xmlFilePath = Path.Combine(configPath, "PlayersCustomEnchantmentsDescriptions.xml");
         }
 
         public static CustomEnchantmentsManager Instance
@@ -31,6 +33,9 @@ namespace OutwardEnchantmentsViewer.Managers
                 return _instance;
             }
         }
+
+        public string configPath = "";
+        public string xmlFilePath = "";
 
         public Dictionary<int, EnchantmentDescription> EnchantmentsDictionary { get => _enchantmentsDictionary; set => _enchantmentsDictionary = value; }
 
@@ -49,6 +54,14 @@ namespace OutwardEnchantmentsViewer.Managers
             return enchantmentDescription;
         }
 
+        public void LoadPlayerCustomEnchantmentsDescriptions()
+        {
+            if (!File.Exists(xmlFilePath))
+                return;
+
+            LoadEnchantmentDictionaryFromXml(xmlFilePath);
+        }
+
         public void LoadEnchantmentDictionaryFromXml(string filePath)
         {
             try
@@ -58,7 +71,7 @@ namespace OutwardEnchantmentsViewer.Managers
                 if (container == null || container.enchantments == null || container.enchantments.Count < 1)
                 {
                     #if DEBUG
-                    SL.Log($"{OutwardEnchantmentsViewer.prefix} CustomEnchantmentsManager@LoadEnchantmentDictionaryFromXML couldn't open enchantments Json file!");
+                    SL.Log($"{OutwardEnchantmentsViewer.prefix} CustomEnchantmentsManager@LoadEnchantmentDictionaryFromXML couldn't open enchantments Xml file!");
                     #endif
                     return;
                 }
@@ -66,6 +79,7 @@ namespace OutwardEnchantmentsViewer.Managers
                 Dictionary<int, EnchantmentDescription> finalData = container.ToDictionary();
 
                 EnchantmentsDictionary = finalData;
+                SL.Log($"{OutwardEnchantmentsViewer.prefix} Successfully loaded xml: {filePath} for enchantment descriptions!");
             }
             catch(Exception ex)
             {

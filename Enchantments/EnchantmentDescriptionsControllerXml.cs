@@ -13,7 +13,7 @@ namespace OutwardEnchantmentsViewer.Enchantments
     {
         [XmlArray("enchantments")]
         [XmlArrayItem("enchantment")]
-        public List<EnchantmentEntryJson> enchantments { get; set; }
+        public List<EnchantmentEntryXml> enchantments { get; set; }
 
         public Dictionary<int, EnchantmentDescription> ToDictionary()
         {

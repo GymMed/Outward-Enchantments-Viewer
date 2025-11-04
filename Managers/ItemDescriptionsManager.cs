@@ -631,15 +631,7 @@ namespace OutwardEnchantmentsViewer.Managers
                 if (enchantmentDescription.overwrite)
                     return new EnchantmentInformationData(enchantmentDescription.description, "");
 
-                EnchantmentInformationData dynamicEnchantmentData = GetDynamicEnchantmentInformationSection(enchantment, recipe);
-                string fixedDescription = "";
-
-                if (enchantmentDescription.description.StartsWith("\n"))
-                    fixedDescription = enchantmentDescription.description.TrimStart('\n');
-                else
-                    fixedDescription = enchantmentDescription.description;
-
-                return new EnchantmentInformationData(fixedDescription + dynamicEnchantmentData.DynamicDescription, dynamicEnchantmentData.EquipmentType);
+                return GetDynamicEnchantmentInformationSection(enchantment, recipe);
             }
             catch (Exception ex) 
             {
@@ -695,12 +687,7 @@ namespace OutwardEnchantmentsViewer.Managers
                 output += $"Track Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n";
             }
 
-            if (!string.IsNullOrWhiteSpace(enchantment.Description))
-            {
-                output += $"{enchantment.Description} \n";
-            }
-
-            output += CustomEnchantmentsDescriptionsExtensions.GetDescription(enchantment.PresetID);
+            output += EnchantmentsHelper.GetModifiedEnchantmentDescription(enchantment);
 
             if(output == "")
             {

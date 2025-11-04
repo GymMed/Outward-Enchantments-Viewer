@@ -1,4 +1,6 @@
 ﻿using Epic.OnlineServices.AntiCheatCommon;
+using OutwardEnchantmentsViewer.Enchantments;
+using OutwardEnchantmentsViewer.Managers;
 using SideLoader;
 using Steamworks;
 using System;
@@ -224,10 +226,7 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                 output += $"Tracking Damage Ratio {enchantment.TrackDamageRatio.ToString()} \n";
             }
 
-            if (!string.IsNullOrWhiteSpace(enchantment.Description))
-            {
-                output += $"{enchantment.Description} \n";
-            }
+            output += EnchantmentsHelper.GetModifiedEnchantmentDescription(enchantment);
 
             if(output == "" && previousInput == "")
             {
@@ -523,6 +522,15 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
                     methodsOutput += GetEffectsDescription(enchantment);
                     methodsOutput += GetStatsModifcationDescriptions(equipment, enchantment.StatModifications);
                     methodsOutput += GetElementalResistancesDescription(enchantment, bag);
+                    methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
+                }
+                else
+                {
+                    methodsOutput += GetDamageListDescription(enchantment, equipment);
+                    methodsOutput += GetDamageModifiersDescription(enchantment, equipment);
+                    methodsOutput += GetEffectsDescription(enchantment);
+                    methodsOutput += GetStatsModifcationDescriptions(equipment, enchantment.StatModifications);
+                    methodsOutput += GetElementalResistancesDescription(enchantment, equipment);
                     methodsOutput += GetAdditionalDescriptions(equipment, enchantment, methodsOutput);
                 }
 

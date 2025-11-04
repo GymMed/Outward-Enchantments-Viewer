@@ -16,19 +16,22 @@ using UnityEngine.UI;
 using System.IO;
 using OutwardEnchantmentsViewer.Utility.Helpers;
 using OutwardEnchantmentsViewer.Enchantments;
+using OutwardEnchantmentsViewer.Events;
 
 namespace OutwardEnchantmentsViewer
 {
     [BepInPlugin(GUID, NAME, VERSION)]
     public class OutwardEnchantmentsViewer : BaseUnityPlugin
     {
-        public const string GUID = "gymmed.outwardenchantmentsviewer";
+        public const string GUID = "gymmed.outward_enchantments_viewer";
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "0.5.1";
+        public const string VERSION = "1.0.0";
 
-        public static string prefix = "[gymmed-Enchantments-Viewer]";
+        public const string EVENT_BUS_ALL_GUID = GUID + "_*";
+
+        public static string prefix = "[GymMed-Enchantments-Viewer]";
 
         // For accessing your BepInEx Logger from outside of this class (eg Plugin.Log.LogMessage("");)
         public static ManualLogSource Log 
@@ -63,15 +66,45 @@ namespace OutwardEnchantmentsViewer
             #endif
 
             // Any config settings you define should be set up like this:
-            ShowEnchantmentDescriptions = Config.Bind("Enchantments Descriptions", "ShowEnchantmentDescriptions", true, "Show detailed descriptions for enchantments?");
-            ShowEquipmentDescriptions = Config.Bind("Equipment Descriptions", "ShowEquipmentEnchantmentsDescriptions", true, "Show enchantments for equipment?");
+            ShowEnchantmentDescriptions = Config.Bind(
+                "Enchantments Descriptions", 
+                "ShowEnchantmentDescriptions", 
+                true, 
+                "Show detailed descriptions for enchantments?"
+            );
+            ShowEquipmentDescriptions = Config.Bind(
+                "Equipment Descriptions", 
+                "ShowEquipmentEnchantmentsDescriptions", 
+                true, 
+                "Show enchantments for equipment?"
+            );
             
-            ShowAllAvailableEnchantmentsCountForEquipment = Config.Bind("Equipment Descriptions Header", "ShowAllAvailableEnchantmentsCountForEquipment", true, "Show all available enchantments count for equipment?");
-            ShowMissingEnchantmentsForEquipment = Config.Bind("Equipment Descriptions Body", "ShowMissingEnchantmentsForEquipment", true, "Show missing enchantments for equipment?");
+            ShowAllAvailableEnchantmentsCountForEquipment = Config.Bind(
+                "Equipment Descriptions Header", 
+                "ShowAllAvailableEnchantmentsCountForEquipment", 
+                true, 
+                "Show all available enchantments count for equipment?"
+            );
+            ShowMissingEnchantmentsForEquipment = Config.Bind(
+                "Equipment Descriptions Body", 
+                "ShowMissingEnchantmentsForEquipment", 
+                true, 
+                "Show missing enchantments for equipment?"
+            );
 
-            ShowDescriptionsOnlyForInventory = Config.Bind("Show Descriptions in Panels", "ShowDescriptionsOnlyForInventory", false, "Show descriptions only for items in inventory?");
+            ShowDescriptionsOnlyForInventory = Config.Bind(
+                "Show Descriptions in Panels", 
+                "ShowDescriptionsOnlyForInventory", 
+                false, 
+                "Show descriptions only for items in inventory?"
+            );
 
-            ShowEquipmentDescriptions = Config.Bind("Equipment Descriptions", "ShowEquipmentEnchantmentsDescriptions", true, "Show enchantments for equipment?");
+            ShowEquipmentDescriptions = Config.Bind(
+                "Equipment Descriptions", 
+                "ShowEquipmentEnchantmentsDescriptions", 
+                true,
+                "Show enchantments for equipment?"
+            );
 
             ShowEquipmentOwnedEnchantmentsDetailed = Config.Bind(
                 "Equipment Descriptions",
@@ -96,6 +129,9 @@ namespace OutwardEnchantmentsViewer
 
             // Harmony is for patching methods. If you're not patching anything, you can comment-out or delete this line.
             new Harmony(GUID).PatchAll();
+
+            EventBusRegister.RegisterEvents();
+            EventBusSubscriber.AddSubscribers();
         }
 
         // Update is called once per frame. Use this only if needed.
@@ -196,18 +232,10 @@ namespace OutwardEnchantmentsViewer
         {
             static void Postfix(ResourcesPrefabManager __instance)
             {
-                #if DEBUG
+#if DEBUG
                 SL.Log($"{OutwardEnchantmentsViewer.prefix} ResourcesPrefabManager@Load called!");
-                #endif
-
-                string path = Path.Combine(
-                    XmlSerializerHelper.GetProjectLocation(),
-                    "customEnchantmentsDescriptions.xml"
-                );
-
-                CustomEnchantmentsManager.Instance.LoadEnchantmentDictionaryFromXml(
-                    path
-                );
+#endif
+                CustomEnchantmentsManager.Instance.LoadPlayerCustomEnchantmentsDescriptions();
 
                 EnchantmentsHelper.FixFilterRecipe();
             }
