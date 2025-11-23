@@ -87,7 +87,7 @@ public static void PublishEnchantmentDescriptions()
 
 ## <a id="#configurable-display-settings"><a/>Configurable Display Settings
 
-Control how enchantment information is displayed through `BepInEx\config\gymmed.outwardenchantmentsviewer.cfg`. Customize the visibility of enchantment details using the following settings:
+Control how enchantment information is displayed through `BepInEx\config\gymmed.outward_enchantments_viewer.cfg`. Customize the visibility of enchantment details using the following settings:
    - **ShowEnchantmentDescriptions** – Enable or disable detailed enchantment descriptions.  
    - **ShowEquipmentDescriptions** – Toggle the display of enchantments on equipment.  
    - **ShowAllAvailableEnchantmentsCountForEquipment** – Choose whether to show the total number of enchantments available for each piece of equipment.  

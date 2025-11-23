@@ -27,7 +27,7 @@ namespace OutwardEnchantmentsViewer
         // Choose a NAME for your project, generally the same as your Assembly Name.
         public const string NAME = "Outward Enchantments Viewer";
 
-        public const string VERSION = "1.0.1";
+        public const string VERSION = "1.0.2";
 
         public const string EVENT_BUS_ALL_GUID = GUID + "_*";
 
@@ -275,9 +275,12 @@ namespace OutwardEnchantmentsViewer
             {
                 try
                 {
-                    #if DEBUG
+#if DEBUG
                     SL.Log($"{OutwardEnchantmentsViewer.prefix} ItemDetailsDisplay@RefreshDetails called!");
-                    #endif
+#endif
+                    string scene = SceneManagerHelper.ActiveSceneName;
+                    if (scene == "LowMemory_TransitionScene" || scene == "MainMenu_Empty")
+                        return;
 
                     Item item = __instance.itemDisplay?.RefItem;
                     ItemDisplayManager.Instance.ShowOriginalDescription(__instance);
