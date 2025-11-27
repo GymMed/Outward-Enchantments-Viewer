@@ -230,6 +230,11 @@ namespace OutwardEnchantmentsViewer.Utility.Helpers
 
             if(output == "" && previousInput == "")
             {
+                List<EnchantmentRecipe> recipes = EnchantmentsHelper.GetEnchantmentRecipesForEnchantment(enchantment);
+
+                if (recipes.Count > 0 && recipes[0].RecipeID < 118)
+                    return "Provides neither bonuses nor penalties \n";
+
                 return "Doesn't give stats in traditional way and uses unknown properties \n";
             }
 
